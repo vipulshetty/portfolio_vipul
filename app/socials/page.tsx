@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect } from 'react'
+import React, { useRef, useEffect } from 'react'
 import { motion, useAnimation, AnimatePresence } from 'framer-motion'
 import { FaGithub, FaLinkedin, FaTwitter, FaEnvelope } from 'react-icons/fa'
 
@@ -18,7 +18,7 @@ const socials: Social[] = [
   { name: 'Email', icon: FaEnvelope, link: 'mailto:your.email@example.com', color: '#ea4335' },
 ]
 
-const SocialCard = ({ social, index }: { social: Social; index: number }) => {
+const SocialCard: React.FC<{ social: Social; index: number }> = ({ social, index }) => {
   const cardRef = useRef<HTMLDivElement>(null)
   const controls = useAnimation()
 
@@ -67,7 +67,7 @@ const SocialCard = ({ social, index }: { social: Social; index: number }) => {
             whileHover={{ opacity: 1, scale: 1.2, rotate: 360 }}
             transition={{ duration: 0.5 }}
           >
-            {React.createElement(social.icon, { style: { color: social.color } })}
+            <social.icon style={{ color: social.color }} />
           </motion.div>
         </div>
         <div className="absolute bottom-0 left-0 right-0 p-4 flex justify-between items-center">
@@ -97,7 +97,7 @@ const SocialCard = ({ social, index }: { social: Social; index: number }) => {
   )
 }
 
-const BackgroundAnimation = () => (
+const BackgroundAnimation: React.FC = () => (
   <div className="fixed inset-0 z-0">
     {[...Array(100)].map((_, i) => (
       <motion.div
@@ -128,7 +128,7 @@ const BackgroundAnimation = () => (
   </div>
 )
 
-export default function EnhancedSocialsPage() {
+const EnhancedSocialsPage: React.FC = () => {
   const controls = useAnimation()
 
   useEffect(() => {
@@ -168,3 +168,5 @@ export default function EnhancedSocialsPage() {
     </div>
   )
 }
+
+export default EnhancedSocialsPage

@@ -1,9 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence, useAnimation, useInView } from 'framer-motion'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { Sphere, OrbitControls, Text } from '@react-three/drei'
 
 const experiences = [
   {
@@ -36,35 +34,6 @@ const experiences = [
   },
 ]
 
-const Atom = ({ position, color, title }) => {
-  const mesh = useRef()
-
-  useFrame((state, delta) => {
-    mesh.current.rotation.x += delta * 0.5
-    mesh.current.rotation.y += delta * 0.5
-  })
-
-  return (
-    <group position={position}>
-      <Sphere
-        args={[0.5, 32, 32]}
-        ref={mesh}
-      >
-        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.5} />
-      </Sphere>
-      <Text
-        position={[0, -0.7, 0]}
-        fontSize={0.2}
-        color="white"
-        anchorX="center"
-        anchorY="middle"
-      >
-        {title}
-      </Text>
-    </group>
-  )
-}
-
 const ExperienceCard = ({ experience, index }) => {
   const controls = useAnimation()
   const ref = useRef(null)
@@ -86,16 +55,16 @@ const ExperienceCard = ({ experience, index }) => {
         visible: { opacity: 1, y: 0, transition: { duration: 0.5, delay: index * 0.2 } },
         hidden: { opacity: 0, y: 50 }
       }}
-      className="bg-black bg-opacity-50 backdrop-blur-lg rounded-lg p-6 mb-8 border border-gray-800 hover:border-gray-600 transition-all duration-300"
+      className="bg-white rounded-lg p-6 mb-8 shadow-md"
     >
       <h3 className="text-2xl font-bold mb-2" style={{ color: experience.color }}>
         {experience.title}
       </h3>
-      <p className="text-gray-300 mb-1">{experience.company}</p>
-      <p className="text-gray-400 mb-4">{experience.period}</p>
+      <p className="text-gray-700 mb-1">{experience.company}</p>
+      <p className="text-gray-600 mb-4">{experience.period}</p>
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="text-white bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
+        className="text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
         aria-expanded={isExpanded}
       >
         {isExpanded ? 'Hide Details' : 'Show Details'}
@@ -107,7 +76,7 @@ const ExperienceCard = ({ experience, index }) => {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="text-gray-300 mt-4"
+            className="text-gray-700 mt-4"
           >
             {experience.description}
           </motion.p>
@@ -117,76 +86,22 @@ const ExperienceCard = ({ experience, index }) => {
   )
 }
 
-const Background = () => {
-  const count = 2000
-  const positions = new Float32Array(count * 3)
-  const colors = new Float32Array(count * 3)
-  for (let i = 0; i < count; i++) {
-    positions[i * 3] = (Math.random() - 0.5) * 10
-    positions[i * 3 + 1] = (Math.random() - 0.5) * 10
-    positions[i * 3 + 2] = (Math.random() - 0.5) * 10
-    colors[i * 3] = Math.random()
-    colors[i * 3 + 1] = Math.random()
-    colors[i * 3 + 2] = Math.random()
-  }
-
-  return (
-    <points>
-      <bufferGeometry>
-        <bufferAttribute
-          attachObject={['attributes', 'position']}
-          count={positions.length / 3}
-          array={positions}
-          itemSize={3}
-        />
-        <bufferAttribute
-          attachObject={['attributes', 'color']}
-          count={colors.length / 3}
-          array={colors}
-          itemSize={3}
-        />
-      </bufferGeometry>
-      <pointsMaterial size={0.015} vertexColors />
-    </points>
-  )
-}
-
 export default function ExperiencePage() {
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-black text-white">
-      <Canvas className="absolute inset-0" camera={{ position: [0, 0, 5] }}>
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} />
-        <Background />
-        <OrbitControls enableZoom={false} enablePan={false} enableRotate={true} />
-        {experiences.map((exp, index) => (
-          <Atom 
-            key={index} 
-            position={[
-              Math.cos(index / experiences.length * Math.PI * 2) * 3,
-              Math.sin(index / experiences.length * Math.PI * 2) * 3,
-              0
-            ]} 
-            color={exp.color}
-            title={exp.title}
-          />
-        ))}
-      </Canvas>
-      <div className="absolute inset-0 overflow-auto">
-        <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-          <motion.h1
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.5 }}
-            className="text-6xl font-bold text-center mb-16 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500"
-          >
-            My Cosmic Journey
-          </motion.h1>
-          <div className="space-y-8">
-            {experiences.map((experience, index) => (
-              <ExperienceCard key={index} experience={experience} index={index} />
-            ))}
-          </div>
+    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        <motion.h1
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.5 }}
+          className="text-6xl font-bold text-center mb-16 text-gray-800"
+        >
+          My Journey
+        </motion.h1>
+        <div className="space-y-8">
+          {experiences.map((experience, index) => (
+            <ExperienceCard key={index} experience={experience} index={index} />
+          ))}
         </div>
       </div>
     </div>

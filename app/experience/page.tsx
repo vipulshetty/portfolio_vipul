@@ -1,9 +1,17 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useAnimation, useInView } from 'framer-motion'
 
-const experiences = [
+interface Experience {
+  title: string;
+  company: string;
+  period: string;
+  description: string;
+  color: string;
+}
+
+const experiences: Experience[] = [
   {
     title: 'Senior Software Engineer',
     company: 'Tech Innovators Inc.',
@@ -34,7 +42,12 @@ const experiences = [
   },
 ]
 
-const ExperienceCard = ({ experience, index }) => {
+interface ExperienceCardProps {
+  experience: Experience;
+  index: number;
+}
+
+const ExperienceCard: React.FC<ExperienceCardProps> = ({ experience, index }) => {
   const controls = useAnimation()
   const ref = useRef(null)
   const inView = useInView(ref)
@@ -55,16 +68,16 @@ const ExperienceCard = ({ experience, index }) => {
         visible: { opacity: 1, y: 0, transition: { duration: 0.5, delay: index * 0.2 } },
         hidden: { opacity: 0, y: 50 }
       }}
-      className="bg-white rounded-lg p-6 mb-8 shadow-md"
+      className="bg-gray-800 rounded-lg p-6 mb-8 border border-gray-700 hover:border-gray-600 transition-all duration-300"
     >
       <h3 className="text-2xl font-bold mb-2" style={{ color: experience.color }}>
         {experience.title}
       </h3>
-      <p className="text-gray-700 mb-1">{experience.company}</p>
-      <p className="text-gray-600 mb-4">{experience.period}</p>
+      <p className="text-gray-300 mb-1">{experience.company}</p>
+      <p className="text-gray-400 mb-4">{experience.period}</p>
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
+        className="text-white bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
         aria-expanded={isExpanded}
       >
         {isExpanded ? 'Hide Details' : 'Show Details'}
@@ -76,7 +89,7 @@ const ExperienceCard = ({ experience, index }) => {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="text-gray-700 mt-4"
+            className="text-gray-300 mt-4"
           >
             {experience.description}
           </motion.p>
@@ -88,13 +101,13 @@ const ExperienceCard = ({ experience, index }) => {
 
 export default function ExperiencePage() {
   return (
-    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <motion.h1
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.5 }}
-          className="text-6xl font-bold text-center mb-16 text-gray-800"
+          className="text-6xl font-bold text-center mb-16 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500"
         >
           My Journey
         </motion.h1>

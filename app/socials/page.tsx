@@ -139,7 +139,7 @@ export default function EnhancedSocialsPage() {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="text-4xl md:text-5xl font-extrabold text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500"
         >
-          Let&apos;s Connect
+          Let's Connect
         </motion.h1>
         <motion.div
           initial={{ opacity: 0 }}
@@ -147,7 +147,7 @@ export default function EnhancedSocialsPage() {
           transition={{ duration: 1, delay: 0.5 }}
           className="text-center text-gray-400 mb-12 max-w-2xl mx-auto"
         >
-          <p>Explore my digital presence and get in touch. I&apos;m always excited to connect and collaborate!</p>
+          <p>I'm always excited to connect and collaborate!</p>
         </motion.div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {socials.map((social, index) => (

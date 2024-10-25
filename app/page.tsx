@@ -142,7 +142,7 @@ export default function Home() {
             className="text-5xl sm:text-7xl font-bold mb-8 relative inline-block"
           >
             <span className="animate-subtle-glow">
-              I&apos;m Vipul Shetty
+              I'm Vipul Shetty
             </span>
           </motion.h2>
           <motion.p 

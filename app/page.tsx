@@ -94,6 +94,7 @@ function ParticleField() {
     }
 
     function drawParticles() {
+      if (!ctx || !canvas) return
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'
       particles.forEach((particle) => {
@@ -113,8 +114,10 @@ function ParticleField() {
     drawParticles()
 
     const handleResize = () => {
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
+      if (canvas) {
+        canvas.width = window.innerWidth
+        canvas.height = window.innerHeight
+      }
     }
 
     window.addEventListener('resize', handleResize)

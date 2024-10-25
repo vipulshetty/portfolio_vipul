@@ -1,25 +1,33 @@
 'use client'
 
 import { useRef, useEffect } from 'react'
-import { motion, useAnimation } from 'framer-motion'
+import { motion, useAnimation, AnimatePresence } from 'framer-motion'
 import { FaGithub, FaLinkedin, FaTwitter, FaEnvelope } from 'react-icons/fa'
 
-const socials = [
+interface Social {
+  name: string;
+  icon: React.ElementType;
+  link: string;
+  color: string;
+}
+
+const socials: Social[] = [
   { name: 'GitHub', icon: FaGithub, link: 'https://github.com/yourusername', color: '#6e5494' },
   { name: 'LinkedIn', icon: FaLinkedin, link: 'https://www.linkedin.com/in/yourusername', color: '#0077b5' },
   { name: 'Twitter', icon: FaTwitter, link: 'https://twitter.com/yourusername', color: '#1da1f2' },
   { name: 'Email', icon: FaEnvelope, link: 'mailto:your.email@example.com', color: '#ea4335' },
 ]
 
-const SocialCard = ({ social, index }) => {
-  const cardRef = useRef(null)
+const SocialCard = ({ social, index }: { social: Social; index: number }) => {
+  const cardRef = useRef<HTMLDivElement>(null)
   const controls = useAnimation()
 
   useEffect(() => {
     controls.start({ opacity: 1, y: 0 })
   }, [controls])
 
-  const handleMouseMove = (event) => {
+  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return
     const rect = cardRef.current.getBoundingClientRect()
     const centerX = rect.left + rect.width / 2
     const centerY = rect.top + rect.height / 2
@@ -30,7 +38,9 @@ const SocialCard = ({ social, index }) => {
   }
 
   const handleMouseLeave = () => {
-    cardRef.current.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)'
+    if (cardRef.current) {
+      cardRef.current.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)'
+    }
   }
 
   return (
@@ -57,7 +67,7 @@ const SocialCard = ({ social, index }) => {
             whileHover={{ opacity: 1, scale: 1.2, rotate: 360 }}
             transition={{ duration: 0.5 }}
           >
-            <social.icon style={{ color: social.color }} />
+            {React.createElement(social.icon, { style: { color: social.color } })}
           </motion.div>
         </div>
         <div className="absolute bottom-0 left-0 right-0 p-4 flex justify-between items-center">

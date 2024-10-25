@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -50,7 +50,7 @@ function NavigationButton({ href, text, icon: Icon, color }) {
 }
 
 function ParticleField() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const canvasRef = useRef(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -62,7 +62,7 @@ function ParticleField() {
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
 
-    const particles: { x: number; y: number; size: number; speedX: number; speedY: number }[] = []
+    const particles = []
     const particleCount = 100
 
     for (let i = 0; i < particleCount; i++) {
@@ -109,7 +109,7 @@ function ParticleField() {
   return <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none" />
 }
 
-export default function Home() {
+export default function Component() {
   const [currentRole, setCurrentRole] = useState(0)
 
   useEffect(() => {
@@ -142,7 +142,7 @@ export default function Home() {
             className="text-5xl sm:text-7xl font-bold mb-8 relative inline-block"
           >
             <span className="animate-subtle-glow">
-              I'm Vipul Shetty
+              I&apos;m Vipul Shetty
             </span>
           </motion.h2>
           <motion.p 

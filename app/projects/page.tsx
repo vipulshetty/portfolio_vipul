@@ -1,6 +1,7 @@
 'use client'
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { motion, AnimatePresence, useAnimation, useMotionValue, useTransform, useSpring } from 'framer-motion'
+
+import { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence, useAnimation } from 'framer-motion'
 import { Sun, Moon, Volume2, VolumeX, ExternalLink, Github, Cpu, Globe, Shield, ChevronUp, Sparkles } from 'lucide-react'
 
 interface Project {
@@ -55,7 +56,7 @@ const useAudio = (url: string) => {
   const [audio] = useState(new Audio(url))
   const [playing, setPlaying] = useState(false)
 
-  const toggle = useCallback(() => setPlaying(!playing), [playing])
+  const toggle = () => setPlaying(!playing)
 
   useEffect(() => {
     playing ? audio.play() : audio.pause()
@@ -123,7 +124,6 @@ export default function EnchantedProjectShowcase() {
   const containerRef = useRef<HTMLDivElement>(null)
   const cursorRef = useRef<HTMLDivElement>(null)
   const cursorGlowRef = useRef<HTMLDivElement>(null)
-  const y = useMotionValue(0)
 
   const [, , playHoverSound] = useAudio('/hover.mp3')
   const [, , playClickSound] = useAudio('/click.mp3')
@@ -138,17 +138,17 @@ export default function EnchantedProjectShowcase() {
     }))
   }, [controls])
 
-  const handleScroll = useCallback(() => {
+  const handleScroll = () => {
     if (containerRef.current) {
-      y.set(containerRef.current.scrollTop)
+      // Handle scroll logic if needed
     }
-  }, [y])
+  }
 
-  const playSound = useCallback((sound: () => void) => {
+  const playSound = (sound: () => void) => {
     if (soundEnabled) {
       sound()
     }
-  }, [soundEnabled])
+  }
 
   useEffect(() => {
     const moveCursor = (e: MouseEvent) => {
@@ -176,7 +176,7 @@ export default function EnchantedProjectShowcase() {
       <div 
         ref={cursorRef} 
         className="fixed w-6 h-6 rounded-full border-2 pointer-events-none z-50 mix-blend-difference"
-        style={{ borderColor: theme.text, transition: 'width 0.3s, height 0.3s, border-radius 0.3s' }}
+        style={{ borderColor: theme.text,   transition: 'width 0.3s, height 0.3s, border-radius 0.3s' }}
       />
       <div 
         ref={cursorGlowRef} 
@@ -311,8 +311,7 @@ export default function EnchantedProjectShowcase() {
                       </motion.div>
                     </div>
                   </div>
-                  <div className="absolute in
-set-0 backface-hidden rotate-y-180 rounded-2xl overflow-hidden">
+                  <div className="absolute inset-0 backface-hidden rotate-y-180 rounded-2xl overflow-hidden">
                     <div className="w-full h-full flex flex-col justify-center items-center p-6" style={{ backgroundColor: theme.card }}>
                       <motion.div 
                         className="mb-6"

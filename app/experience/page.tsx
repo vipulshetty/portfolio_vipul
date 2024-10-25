@@ -1,10 +1,9 @@
-"use client"
+'use client'
 
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useAnimation, useInView } from 'framer-motion'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { Sphere, OrbitControls, Stars, Text } from '@react-three/drei'
-import * as THREE from 'three'
+import { Sphere, OrbitControls, Text } from '@react-three/drei'
 
 const experiences = [
   {
@@ -39,7 +38,6 @@ const experiences = [
 
 const Atom = ({ position, color, title }) => {
   const mesh = useRef()
-  const [hovered, setHover] = useState(false)
 
   useFrame((state, delta) => {
     mesh.current.rotation.x += delta * 0.5
@@ -51,10 +49,8 @@ const Atom = ({ position, color, title }) => {
       <Sphere
         args={[0.5, 32, 32]}
         ref={mesh}
-        onPointerOver={() => setHover(true)}
-        onPointerOut={() => setHover(false)}
       >
-        <meshStandardMaterial color={hovered ? 'white' : color} emissive={color} emissiveIntensity={0.5} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.5} />
       </Sphere>
       <Text
         position={[0, -0.7, 0]}
@@ -123,19 +119,16 @@ const ExperienceCard = ({ experience, index }) => {
 
 const Background = () => {
   const count = 2000
-  const [positions, colors] = useMemo(() => {
-    const positions = new Float32Array(count * 3)
-    const colors = new Float32Array(count * 3)
-    for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 10
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 10
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 10
-      colors[i * 3] = Math.random()
-      colors[i * 3 + 1] = Math.random()
-      colors[i * 3 + 2] = Math.random()
-    }
-    return [positions, colors]
-  }, [count])
+  const positions = new Float32Array(count * 3)
+  const colors = new Float32Array(count * 3)
+  for (let i = 0; i < count; i++) {
+    positions[i * 3] = (Math.random() - 0.5) * 10
+    positions[i * 3 + 1] = (Math.random() - 0.5) * 10
+    positions[i * 3 + 2] = (Math.random() - 0.5) * 10
+    colors[i * 3] = Math.random()
+    colors[i * 3 + 1] = Math.random()
+    colors[i * 3 + 2] = Math.random()
+  }
 
   return (
     <points>

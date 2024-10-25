@@ -1,7 +1,7 @@
-"use client"
+'use client'
 
 import { useRef, useEffect } from 'react'
-import { motion, useAnimation, useMotionValue, useTransform } from 'framer-motion'
+import { motion, useAnimation } from 'framer-motion'
 import { FaGithub, FaLinkedin, FaTwitter, FaEnvelope } from 'react-icons/fa'
 
 const socials = [
@@ -13,22 +13,24 @@ const socials = [
 
 const SocialCard = ({ social, index }) => {
   const cardRef = useRef(null)
-  const x = useMotionValue(0)
-  const y = useMotionValue(0)
-  const rotateX = useTransform(y, [-50, 50], [10, -10])
-  const rotateY = useTransform(x, [-50, 50], [-10, 10])
+  const controls = useAnimation()
+
+  useEffect(() => {
+    controls.start({ opacity: 1, y: 0 })
+  }, [controls])
 
   const handleMouseMove = (event) => {
     const rect = cardRef.current.getBoundingClientRect()
     const centerX = rect.left + rect.width / 2
     const centerY = rect.top + rect.height / 2
-    x.set(event.clientX - centerX)
-    y.set(event.clientY - centerY)
+    const rotateX = (event.clientY - centerY) / 10
+    const rotateY = (centerX - event.clientX) / 10
+
+    cardRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`
   }
 
   const handleMouseLeave = () => {
-    x.set(0)
-    y.set(0)
+    cardRef.current.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)'
   }
 
   return (
@@ -37,18 +39,13 @@ const SocialCard = ({ social, index }) => {
       className="relative w-full"
       style={{ perspective: 1000 }}
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={controls}
       transition={{ duration: 0.5, delay: index * 0.1 }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
       <motion.div
         className="w-full h-32 rounded-2xl bg-gradient-to-br from-gray-900 to-black shadow-lg overflow-hidden p-4 relative"
-        style={{
-          rotateX,
-          rotateY,
-          transformStyle: "preserve-3d",
-        }}
         whileHover={{ scale: 1.05 }}
         transition={{ duration: 0.2 }}
       >
@@ -122,16 +119,6 @@ const BackgroundAnimation = () => (
 )
 
 export default function EnhancedSocialsPage() {
-  const controls = useAnimation()
-
-  useEffect(() => {
-    controls.start(i => ({
-      opacity: 1,
-      y: 0,
-      transition: { delay: i * 0.2 },
-    }))
-  }, [controls])
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black overflow-hidden relative">
       <BackgroundAnimation />
@@ -142,7 +129,7 @@ export default function EnhancedSocialsPage() {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="text-4xl md:text-5xl font-extrabold text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500"
         >
-          Let's Connect
+          Let&apos;s Connect
         </motion.h1>
         <motion.div
           initial={{ opacity: 0 }}
@@ -150,7 +137,7 @@ export default function EnhancedSocialsPage() {
           transition={{ duration: 1, delay: 0.5 }}
           className="text-center text-gray-400 mb-12 max-w-2xl mx-auto"
         >
-          <p>Explore my digital presence and get in touch. I'm always excited to connect and collaborate!</p>
+          <p>Explore my digital presence and get in touch. I&apos;m always excited to connect and collaborate!</p>
         </motion.div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {socials.map((social, index) => (

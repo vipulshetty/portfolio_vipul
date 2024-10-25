@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence, useAnimation } from 'framer-motion'
 import { Sun, Moon, Volume2, VolumeX, ExternalLink, Github, Cpu, Globe, Shield, ChevronUp, Sparkles } from 'lucide-react'
-import Image from 'next/image'
 
 interface Project {
   id: number
@@ -176,7 +176,7 @@ export default function EnchantedProjectShowcase() {
       <div 
         ref={cursorRef} 
         className="fixed w-6 h-6 rounded-full border-2 pointer-events-none z-50 mix-blend-difference"
-        style={{ borderColor: theme.text, transition: 'width 0.3s, height 0.3s, border-radius 0.3s' }}
+        style={{ borderColor: theme.text,   transition: 'width 0.3s, height 0.3s, border-radius 0.3s' }}
       />
       <div 
         ref={cursorGlowRef} 
@@ -268,60 +268,88 @@ export default function EnchantedProjectShowcase() {
                   whileHover={{
                     rotateY: 180,
                     scale: 1.05,
-                    boxShadow: `0 25px 50px -12px ${project.color}`,
+                    boxShadow: `0 25px 50px -12px ${project.color}66`,
                   }}
+                  transition={{ duration: 0.6, ease: "easeInOut" }}
                 >
-                  <div className="absolute inset-0 backface-hidden">
-                    <Image
-                      src={project.image}
-                      alt={project.title}
-                      layout="fill"
-                      objectFit="cover"
-                      className="rounded-2xl"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent rounded-2xl" />
+                  <div className="absolute inset-0 backface-hidden rounded-2xl overflow-hidden">
+                    <img src={project.image} alt={project.title} className="w-full h-56 object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-60" />
                     <div className="absolute bottom-0 left-0 right-0 p-6">
-                      <h2 className="text-3xl font-bold mb-2 text-white">{project.title}</h2>
-                      <p className="text-gray-300 mb-4">{project.description}</p>
-                      <div className="flex items-center space-x-2">
-                        {project.technologies.map((tech) => (
-                          <span key={tech} className="px-2 py-1 bg-gray-800 text-gray-300 rounded text-sm">
+                      <motion.h2 
+                        className="text-3xl font-bold mb-2 text-white"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                      >
+                        {project.title}
+                      </motion.h2>
+                      <motion.p 
+                        className="text-gray-200 mb-4"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                      >
+                        {project.description}
+                      </motion.p>
+                      <motion.div 
+                        className="flex flex-wrap gap-2"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.4 }}
+                      >
+                        {project.technologies.map((tech, index) => (
+                          <motion.span 
+                            key={index} 
+                            className="px-3 py-1 rounded-full text-sm font-medium text-white"
+                            style={{ backgroundColor: project.color }}
+                            whileHover={{ scale: 1.1, boxShadow: `0 0 10px ${project.color}` }}
+                          >
                             {tech}
-                          </span>
+                          </motion.span>
                         ))}
-                      </div>
-                    </div>
-                    <div 
-                      className="absolute top-4 right-4 w-16 h-16 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: project.color }}
-                    >
-                      {project.icon}
+                      </motion.div>
                     </div>
                   </div>
-                  <div className="absolute inset-0 backface-hidden rotateY-180 flex flex-col justify-center items-center p-8 text-center">
-                    <h3 className="text-2xl font-bold mb-4">{project.title}</h3>
-                    <p className="mb-8">{project.description}</p>
-                    <div className="flex space-x-4">
-                      <motion.a
-                        href={project.githubUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-800 text-white hover:bg-gray-700 transition-colors"
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
+                  <div className="absolute inset-0 backface-hidden rotate-y-180 rounded-2xl overflow-hidden">
+                    <div className="w-full h-full flex flex-col justify-center items-center p-6" style={{ backgroundColor: theme.card }}>
+                      <motion.div 
+                        className="mb-6"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
                       >
-                        <Github />
-                      </motion.a>
-                      <motion.a
-                        href={project.liveUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-600 text-white hover:bg-blue-500 transition-colors"
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                      >
-                        <ExternalLink />
-                      </motion.a>
+                        {project.icon}
+                      </motion.div>
+                      <h3 className="text-3xl font-bold mb-4" style={{ color: project.color }}>{project.title}</h3>
+                      <p className="text-center mb-6" style={{ color: theme.text }}>
+                        Dive deeper into the {project.title} project. Explore the code or see it in action!
+                      </p>
+                      <div className="flex space-x-4">
+                        <motion.a
+                          href={project.githubUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center px-4 py-2 rounded-full"
+                          style={{ backgroundColor: theme.text, color: theme.card }}
+                          whileHover={{ scale: 1.05, boxShadow: `0 0 15px ${project.color}` }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <Github className="w-5 h-5 mr-2" />
+                          <span>GitHub</span>
+                        </motion.a>
+                        <motion.a
+                          href={project.liveUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center px-4 py-2 rounded-full"
+                          style={{ backgroundColor: project.color, color: 'white' }}
+                          whileHover={{ scale: 1.05, boxShadow: `0 0 15px ${project.color}` }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <ExternalLink className="w-5 h-5 mr-2" />
+                          <span>Live Demo</span>
+                        </motion.a>
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -330,43 +358,58 @@ export default function EnchantedProjectShowcase() {
           </div>
         </motion.div>
       </div>
-      <motion.button
-        className="fixed bottom-8 right-8 z-40 p-4 rounded-full bg-blue-600 text-white shadow-lg"
+      <motion.div
+        className="fixed bottom-8 right-8 z-40"
         initial={{ opacity: 0, y: 100 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1 }}
-        onClick={() => containerRef.current?.scrollTo({ top: 0, behavior: 'smooth' })}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        transition={{ delay: 0.5 }}
       >
-        <ChevronUp />
-      </motion.button>
+        <motion.button
+          className="p-3 rounded-full bg-white text-gray-900 shadow-lg"
+          whileHover={{ scale: 1.1, rotate: 360, boxShadow: "0 0 15px rgba(255, 255, 255, 0.5)" }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => containerRef.current?.scrollTo({ top: 0, behavior: 'smooth' })}
+        >
+          <ChevronUp className="w-6 h-6" />
+        </motion.button>
+      </motion.div>
       <style jsx global>{`
-        .perspective {
-          perspective: 1000px;
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+
+        body {
+          font-family: 'Orbitron', sans-serif;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: ${theme.background};
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: ${activeProject?.color || theme.text};
+          border-radius: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: ${activeProject?.color ? activeProject.color + 'cc' : theme.text + 'cc'};
+        }
+        @keyframes float {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-20px); }
+          100% { transform: translateY(0px); }
+        }
+        .backface-hidden {
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
         }
         .preserve-3d {
           transform-style: preserve-3d;
         }
-        .backface-hidden {
-          backface-visibility: hidden;
+        .perspective-1000 {
+          perspective: 1000px;
         }
-        .rotateY-180 {
+        .rotate-y-180 {
           transform: rotateY(180deg);
-        }
-        .custom-scrollbar {
-          scrollbar-width: thin;
-          scrollbar-color: ${theme.text} transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background-color: ${theme.text};
-          border-radius: 3px;
         }
       `}</style>
     </motion.div>

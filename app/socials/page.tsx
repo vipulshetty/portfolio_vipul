@@ -119,6 +119,16 @@ const BackgroundAnimation = () => (
 )
 
 export default function EnhancedSocialsPage() {
+  const controls = useAnimation()
+
+  useEffect(() => {
+    controls.start(i => ({
+      opacity: 1,
+      y: 0,
+      transition: { delay: i * 0.2 },
+    }))
+  }, [controls])
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black overflow-hidden relative">
       <BackgroundAnimation />

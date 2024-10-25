@@ -109,7 +109,7 @@ function ParticleField() {
   return <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none" />
 }
 
-export default function Component() {
+export default function Home() {
   const [currentRole, setCurrentRole] = useState(0)
 
   useEffect(() => {
@@ -161,7 +161,7 @@ export default function Component() {
         <div className="max-w-7xl mx-auto w-full">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1,   y: 0 }}
             transition={{ duration: 1, delay: 0.8 }}
             className="backdrop-blur-xl bg-white/5 p-8 sm:p-12 rounded-3xl shadow-2xl border border-gray-800"
           >
@@ -192,7 +192,7 @@ export default function Component() {
                 { href: '/projects', text: 'Portfolio', icon: FaGem, color: '#CC6699' },
                 { href: '/experience', text: 'Journey', icon: FaDragon, color: '#F7DF1E' },
                 { href: '/socials', text: 'Connect', icon: FaMagic, color: '#47A248' },
-              ].map((item, index) => (
+              ].map((item) => (
                 <NavigationButton key={item.href} {...item} />
               ))}
             </div>

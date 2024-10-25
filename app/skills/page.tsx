@@ -8,7 +8,14 @@ import * as THREE from 'three'
 import { FaReact, FaNodeJs, FaPython, FaSass, FaDocker, FaAws } from 'react-icons/fa'
 import { SiNextdotjs, SiRedux, SiExpress, SiMongodb, SiJavascript, SiTypescript, SiFramer, SiCplusplus, SiPostgresql, SiKubernetes, SiApachekafka, SiPrometheus, SiGrafana, SiAzuredevops, SiThreedotjs } from 'react-icons/si'
 
-const skills = [
+interface Skill {
+  name: string;
+  icon: React.ElementType;
+  color: string;
+  type: 'dev' | 'devops';
+}
+
+const skills: Skill[] = [
   { name: 'Next.js', icon: SiNextdotjs, color: '#000000', type: 'dev' },
   { name: 'React', icon: FaReact, color: '#61DAFB', type: 'dev' },
   { name: 'Node.js', icon: FaNodeJs, color: '#339933', type: 'dev' },
@@ -32,13 +39,22 @@ const skills = [
   { name: 'AWS', icon: FaAws, color: '#FF9900', type: 'devops' },
 ]
 
-const SkillNode = ({ skill, position, setHovered, setSelected }) => {
-  const mesh = useRef()
+interface SkillNodeProps {
+  skill: Skill;
+  position: [number, number, number];
+  setHovered: (skill: Skill | null) => void;
+  setSelected: (skill: Skill | null) => void;
+}
+
+const SkillNode: React.FC<SkillNodeProps> = ({ skill, position, setHovered, setSelected }) => {
+  const mesh = useRef<THREE.Mesh>(null)
   const { viewport } = useThree()
 
   useFrame(({ clock }) => {
-    mesh.current.rotation.y = Math.sin(clock.getElapsedTime() * 0.5) * 0.2
-    mesh.current.position.y = Math.sin(clock.getElapsedTime() * 0.5) * 0.1
+    if (mesh.current) {
+      mesh.current.rotation.y = Math.sin(clock.getElapsedTime() * 0.5) * 0.2
+      mesh.current.position.y = Math.sin(clock.getElapsedTime() * 0.5) * 0.1
+    }
   })
 
   const texture = useMemo(() => {
@@ -46,11 +62,13 @@ const SkillNode = ({ skill, position, setHovered, setSelected }) => {
     canvas.width = 128
     canvas.height = 128
     const context = canvas.getContext('2d')
-    const gradient = context.createRadialGradient(64, 64, 0, 64, 64, 64)
-    gradient.addColorStop(0, skill.color)
-    gradient.addColorStop(1, 'rgba(0,0,0,0)')
-    context.fillStyle = gradient
-    context.fillRect(0, 0, 128, 128)
+    if (context) {
+      const gradient = context.createRadialGradient(64, 64, 0, 64, 64, 64)
+      gradient.addColorStop(0, skill.color)
+      gradient.addColorStop(1, 'rgba(0,0,0,0)')
+      context.fillStyle = gradient
+      context.fillRect(0, 0, 128, 128)
+    }
     return new THREE.CanvasTexture(canvas)
   }, [skill.color])
 
@@ -102,11 +120,19 @@ const SkillNode = ({ skill, position, setHovered, setSelected }) => {
   )
 }
 
-const SkillConstellation = ({ skills, setHovered, setSelected }) => {
-  const groupRef = useRef()
+interface SkillConstellationProps {
+  skills: Skill[];
+  setHovered: (skill: Skill | null) => void;
+  setSelected: (skill: Skill | null) => void;
+}
+
+const SkillConstellation: React.FC<SkillConstellationProps> = ({ skills, setHovered, setSelected }) => {
+  const groupRef = useRef<THREE.Group>(null)
 
   useFrame(({ clock }) => {
-    groupRef.current.rotation.y = Math.sin(clock.getElapsedTime() * 0.1) * 0.1
+    if (groupRef.current) {
+      groupRef.current.rotation.y = Math.sin(clock.getElapsedTime() * 0.1) * 0.1
+    }
   })
 
   const skillNodes = useMemo(() => 
@@ -131,7 +157,11 @@ const SkillConstellation = ({ skills, setHovered, setSelected }) => {
   return <group ref={groupRef}>{skillNodes}</group>
 }
 
-const SkillDetails = ({ skill }) => (
+interface SkillDetailsProps {
+  skill: Skill;
+}
+
+const SkillDetails: React.FC<SkillDetailsProps> = ({ skill }) => (
   <motion.div
     initial={{ opacity: 0, y: 50 }}
     animate={{ opacity: 1, y: 0 }}
@@ -157,8 +187,8 @@ const SkillDetails = ({ skill }) => (
   </motion.div>
 )
 
-const ParticleField = () => {
-  const particlesRef = useRef()
+const ParticleField: React.FC = () => {
+  const particlesRef = useRef<THREE.Points>(null)
 
   useFrame(({ clock }) => {
     if (particlesRef.current) {
@@ -209,11 +239,13 @@ const ParticleField = () => {
   )
 }
 
-const GlowingRing = () => {
-  const ringRef = useRef()
+const GlowingRing: React.FC = () => {
+  const ringRef = useRef<THREE.Mesh>(null)
 
   useFrame(({ clock }) => {
-    ringRef.current.rotation.z = clock.getElapsedTime() * 0.2
+    if (ringRef.current) {
+      ringRef.current.rotation.z = clock.getElapsedTime() * 0.2
+    }
   })
 
   return (
@@ -225,9 +257,9 @@ const GlowingRing = () => {
 }
 
 export default function Component() {
-  const [hovered, setHovered] = useState(null)
-  const [selected, setSelected] = useState(null)
-  const [skillType, setSkillType] = useState('all')
+  const [hovered, setHovered] = useState<Skill | null>(null)
+  const [selected, setSelected] = useState<Skill | null>(null)
+  const [skillType, setSkillType] = useState<'all' | 'dev' | 'devops'>('all')
   const [autoRotate, setAutoRotate] = useState(true)
 
   const filteredSkills = useMemo(() => 
@@ -236,7 +268,7 @@ export default function Component() {
   )
 
   useEffect(() => {
-    const handleKeyDown = (event) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setSelected(null)
       }
@@ -267,9 +299,9 @@ export default function Component() {
               className={`px-6 py-3 rounded-full ${
                 skillType === type ? 'bg-gradient-to-r from-purple-500 to-pink-500' : 'bg-gray-700'
               } text-white transition-all duration-300 hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600 hover:scale-105 transform`}
-              onClick={() => setSkillType(type)}
+              onClick={() => setSkillType(type as 'all' | 'dev' | 'devops')}
             >
-              {type === 'all' ? 'All' : type === 'dev' ? 'Development' : 'DevOps'}
+              {type === 'all' ? 'All' : type === 'dev' ?   'Development' : 'DevOps'}
             </button>
           ))}
           <button

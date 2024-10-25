@@ -12,7 +12,12 @@ const roles = [
   { title: 'DevOps Specialist', icon: FaRocket, color: '#FF6B6B' },
 ]
 
-function TypewriterEffect({ text, delay = 50 }) {
+interface TypewriterEffectProps {
+  text: string;
+  delay?: number;
+}
+
+function TypewriterEffect({ text, delay = 50 }: TypewriterEffectProps) {
   const [displayText, setDisplayText] = useState('')
   const [currentIndex, setCurrentIndex] = useState(0)
 
@@ -30,7 +35,14 @@ function TypewriterEffect({ text, delay = 50 }) {
   return <span>{displayText}</span>
 }
 
-function NavigationButton({ href, text, icon: Icon, color }) {
+interface NavigationButtonProps {
+  href: string;
+  text: string;
+  icon: React.ElementType;
+  color: string;
+}
+
+function NavigationButton({ href, text, icon: Icon, color }: NavigationButtonProps) {
   return (
     <motion.div
       whileHover={{ scale: 1.05, rotateY: 15 }}
@@ -50,7 +62,7 @@ function NavigationButton({ href, text, icon: Icon, color }) {
 }
 
 function ParticleField() {
-  const canvasRef = useRef(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -62,7 +74,13 @@ function ParticleField() {
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
 
-    const particles = []
+    const particles: Array<{
+      x: number;
+      y: number;
+      size: number;
+      speedX: number;
+      speedY: number;
+    }> = []
     const particleCount = 100
 
     for (let i = 0; i < particleCount; i++) {
@@ -161,7 +179,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto w-full">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1,   y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.8 }}
             className="backdrop-blur-xl bg-white/5 p-8 sm:p-12 rounded-3xl shadow-2xl border border-gray-800"
           >

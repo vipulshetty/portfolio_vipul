@@ -222,16 +222,16 @@ const ParticleField: React.FC = () => {
     <points ref={particlesRef}>
       <bufferGeometry>
         <bufferAttribute
-          attachObject={['attributes', 'position']}
+          attach="attributes-position"
           count={particleCount}
-          itemSize={3}
           array={positions}
+          itemSize={3}
         />
         <bufferAttribute
-          attachObject={['attributes', 'color']}
+          attach="attributes-color"
           count={particleCount}
-          itemSize={3}
           array={colors}
+          itemSize={3}
         />
       </bufferGeometry>
       <pointsMaterial size={0.05} vertexColors />
@@ -299,9 +299,9 @@ export default function Component() {
               className={`px-6 py-3 rounded-full ${
                 skillType === type ? 'bg-gradient-to-r from-purple-500 to-pink-500' : 'bg-gray-700'
               } text-white transition-all duration-300 hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600 hover:scale-105 transform`}
-              onClick={() => setSkillType(type as 'all' | 'dev' | 'devops')}
+              onClick={() => setSkillType(type as 'all' | 'dev' |   'devops')}
             >
-              {type === 'all' ? 'All' : type === 'dev' ?   'Development' : 'DevOps'}
+              {type === 'all' ? 'All' : type === 'dev' ? 'Development' : 'DevOps'}
             </button>
           ))}
           <button

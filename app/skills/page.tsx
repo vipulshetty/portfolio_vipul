@@ -3,11 +3,10 @@
 import { useState, useRef, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Text, OrbitControls, Stars, Html, useTexture, Sparkles, Trail, Float, MeshDistortMaterial } from '@react-three/drei'
+import { Text, OrbitControls, Stars, Html, Sparkles, Trail, Float, MeshDistortMaterial } from '@react-three/drei'
 import * as THREE from 'three'
 import { FaReact, FaNodeJs, FaPython, FaSass, FaDocker, FaAws } from 'react-icons/fa'
-import { SiNextdotjs, SiRedux, SiExpress, SiMongodb, SiJavascript, SiTypescript, SiFramer, SiCplusplus, SiPostgresql, SiKubernetes, SiApachekafka, SiPrometheus, SiGrafana, SiAzuredevops } from 'react-icons/si'
-import { TbBrandReactNative } from 'react-icons/tb'
+import { SiNextdotjs, SiRedux, SiExpress, SiMongodb, SiJavascript, SiTypescript, SiFramer, SiCplusplus, SiPostgresql, SiKubernetes, SiApachekafka, SiPrometheus, SiGrafana, SiAzuredevops, SiThreedotjs } from 'react-icons/si'
 
 const skills = [
   { name: 'Next.js', icon: SiNextdotjs, color: '#000000', type: 'dev' },
@@ -23,7 +22,7 @@ const skills = [
   { name: 'C++', icon: SiCplusplus, color: '#00599C', type: 'dev' },
   { name: 'Sass', icon: FaSass, color: '#CC6699', type: 'dev' },
   { name: 'PostgreSQL', icon: SiPostgresql, color: '#336791', type: 'dev' },
-  { name: 'React Native', icon: TbBrandReactNative, color: '#61DAFB', type: 'dev' },
+  { name: 'Three.js', icon: SiThreedotjs, color: '#000000', type: 'dev' },
   { name: 'Docker', icon: FaDocker, color: '#2496ED', type: 'devops' },
   { name: 'Kubernetes', icon: SiKubernetes, color: '#326CE5', type: 'devops' },
   { name: 'Kafka', icon: SiApachekafka, color: '#231F20', type: 'devops' },
@@ -36,12 +35,24 @@ const skills = [
 const SkillNode = ({ skill, position, setHovered, setSelected }) => {
   const mesh = useRef()
   const { viewport } = useThree()
-  const texture = useTexture('https://picsum.photos/id/237/200/300')
 
   useFrame(({ clock }) => {
     mesh.current.rotation.y = Math.sin(clock.getElapsedTime() * 0.5) * 0.2
     mesh.current.position.y = Math.sin(clock.getElapsedTime() * 0.5) * 0.1
   })
+
+  const texture = useMemo(() => {
+    const canvas = document.createElement('canvas')
+    canvas.width = 128
+    canvas.height = 128
+    const context = canvas.getContext('2d')
+    const gradient = context.createRadialGradient(64, 64, 0, 64, 64, 64)
+    gradient.addColorStop(0, skill.color)
+    gradient.addColorStop(1, 'rgba(0,0,0,0)')
+    context.fillStyle = gradient
+    context.fillRect(0, 0, 128, 128)
+    return new THREE.CanvasTexture(canvas)
+  }, [skill.color])
 
   return (
     <Float speed={1.5} rotationIntensity={0.5} floatIntensity={0.5}>
@@ -125,18 +136,18 @@ const SkillDetails = ({ skill }) => (
     initial={{ opacity: 0, y: 50 }}
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: -50 }}
-    className="absolute bottom-4 left-4 right-4 bg-gray-800 bg-opacity-80 p-6 rounded-lg text-white flex items-center justify-between backdrop-blur-md"
+    className="absolute bottom-4 left-4 right-4 bg-gradient-to-r from-purple-900 to-blue-900 p-6 rounded-lg text-white flex items-center justify-between backdrop-blur-md shadow-lg"
   >
     <div>
-      <h2 className="text-3xl font-bold mb-2 flex items-center">
-        <skill.icon className="mr-2 text-4xl" style={{ color: skill.color }} /> {skill.name}
+      <h2 className="text-4xl font-bold mb-2 flex items-center">
+        <skill.icon className="mr-2 text-5xl" style={{ color: skill.color }} /> {skill.name}
       </h2>
-      <p className="text-lg">
+      <p className="text-xl">
         {skill.type === 'dev' ? 'Development Skill' : 'DevOps Skill'}
       </p>
     </div>
     <motion.div
-      className="text-8xl"
+      className="text-9xl"
       initial={{ rotate: 0 }}
       animate={{ rotate: 360 }}
       transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -156,14 +167,14 @@ const ParticleField = () => {
     }
   })
 
-  const particleCount = 3000
+  const particleCount = 8000
   const [positions, colors] = useMemo(() => {
     const positions = new Float32Array(particleCount * 3)
     const colors = new Float32Array(particleCount * 3)
     for (let i = 0; i < particleCount; i++) {
       const theta = Math.random() * Math.PI * 2
       const phi = Math.acos(Math.random() * 2 - 1)
-      const radius = Math.random() * 25
+      const radius = Math.random() * 30
 
       positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta)
       positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta)
@@ -198,12 +209,26 @@ const ParticleField = () => {
   )
 }
 
+const GlowingRing = () => {
+  const ringRef = useRef()
+
+  useFrame(({ clock }) => {
+    ringRef.current.rotation.z = clock.getElapsedTime() * 0.2
+  })
+
+  return (
+    <mesh ref={ringRef}>
+      <torusGeometry args={[10, 0.1, 16, 100]} />
+      <meshBasicMaterial color="#4a0e4e" />
+    </mesh>
+  )
+}
+
 export default function Component() {
   const [hovered, setHovered] = useState(null)
   const [selected, setSelected] = useState(null)
   const [skillType, setSkillType] = useState('all')
   const [autoRotate, setAutoRotate] = useState(true)
-  const [cameraPosition, setCameraPosition] = useState([0, 0, 12])
 
   const filteredSkills = useMemo(() => 
     skillType === 'all' ? skills : skills.filter(skill => skill.type === skillType),
@@ -220,34 +245,37 @@ export default function Component() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  const handleZoom = (direction) => {
-    setCameraPosition(prev => [prev[0], prev[1], prev[2] + direction])
-  }
-
   return (
     <div className="relative h-screen bg-gradient-to-b from-gray-900 via-blue-900 to-purple-900 overflow-hidden">
-      <Canvas camera={{ position: cameraPosition, fov: 70 }}>
+      <Canvas camera={{ position: [0, 0, 12], fov: 70 }}>
         <ambientLight intensity={0.5} />
         <pointLight position={[10, 10, 10]} />
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
         <ParticleField />
+        <GlowingRing />
         <SkillConstellation skills={filteredSkills} setHovered={setHovered} setSelected={setSelected} />
         <OrbitControls enableZoom={false} enablePan={false} autoRotate={autoRotate} autoRotateSpeed={0.5} />
       </Canvas>
       <div className="absolute top-4 left-4 right-4 flex justify-between items-center">
-        <h1 className="text-4xl font-bold text-white">My Skill Constellation</h1>
+        <h1 className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+          My Skill Constellation
+        </h1>
         <div className="space-x-4">
           {['all', 'dev', 'devops'].map((type) => (
             <button
               key={type}
-              className={`px-4 py-2 rounded-full ${skillType === type ? 'bg-blue-500' : 'bg-gray-700'} text-white transition-colors duration-300 hover:bg-blue-600`}
+              className={`px-6 py-3 rounded-full ${
+                skillType === type ? 'bg-gradient-to-r from-purple-500 to-pink-500' : 'bg-gray-700'
+              } text-white transition-all duration-300 hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600 hover:scale-105 transform`}
               onClick={() => setSkillType(type)}
             >
               {type === 'all' ? 'All' : type === 'dev' ? 'Development' : 'DevOps'}
             </button>
           ))}
           <button
-            className={`px-4 py-2 rounded-full ${autoRotate ? 'bg-green-500' : 'bg-gray-700'} text-white transition-colors duration-300 hover:bg-green-600`}
+            className={`px-6 py-3 rounded-full ${
+              autoRotate ? 'bg-gradient-to-r from-green-500 to-teal-500' : 'bg-gray-700'
+            } text-white transition-all duration-300 hover:bg-gradient-to-r hover:from-green-600 hover:to-teal-600 hover:scale-105 transform`}
             onClick={() => setAutoRotate(!autoRotate)}
           >
             {autoRotate ? 'Auto-rotate On' : 'Auto-rotate Off'}
@@ -262,27 +290,13 @@ export default function Component() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
-          className="absolute bottom-4 left-4 bg-gray-800 bg-opacity-80 p-2 rounded text-white backdrop-blur-sm"
+          className="absolute bottom-4 left-4 bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-lg text-white backdrop-blur-sm shadow-lg"
         >
-          {hovered.name}
+          <span className="text-2xl font-bold">{hovered.name}</span>
         </motion.div>
       )}
-      <div className="absolute bottom-4 right-4 text-white text-sm">
+      <div className="absolute bottom-4 right-4 text-white text-lg bg-gray-800 bg-opacity-50 p-2 rounded-lg backdrop-blur-sm">
         Press ESC to deselect a skill
-      </div>
-      <div className="absolute bottom-4 left-4 flex space-x-2">
-        <button
-          className="px-4 py-2 rounded-full bg-gray-700 text-white transition-colors duration-300 hover:bg-blue-600"
-          onClick={() => handleZoom(-1)}
-        >
-          Zoom In
-        </button>
-        <button
-          className="px-4 py-2 rounded-full bg-gray-700 text-white transition-colors duration-300 hover:bg-blue-600"
-          onClick={() => handleZoom(1)}
-        >
-          Zoom Out
-        </button>
       </div>
     </div>
   )

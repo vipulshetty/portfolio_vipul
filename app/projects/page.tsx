@@ -49,12 +49,12 @@ export default function ProjectsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-950">
-      <div className="relative z-10">
+    <div className="min-h-screen w-full overflow-y-auto">
+      <div className="relative">
         <LampDemo />
       </div>
 
-      <div className="relative z-20 container mx-auto px-4 -mt-16">
+      <div className="container mx-auto px-4 py-8">
         {/* Category Filter */}
         <motion.div 
           className="flex justify-center mb-16"
@@ -93,7 +93,7 @@ export default function ProjectsPage() {
             >
               {/* Animated Background */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
+　
               {/* Content Container */}
               <div className="relative p-8">
                 {/* Project Image */}

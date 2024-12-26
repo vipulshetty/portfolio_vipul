@@ -10,6 +10,23 @@
   --primary-dark: #5C4CE5;
 }
 
+/* Basic reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Prevent default scrolling */
+html, body {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: fixed;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
@@ -19,10 +36,19 @@ body {
   );
   font-feature-settings: "ss01", "ss02", "cv01", "cv02";
   -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
 }
 
+/* Page content */
+.page-content {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Custom scrollbar */
 @layer base {
-  /* Custom Scrollbar */
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
@@ -46,6 +72,21 @@ body {
     background: rgba(108, 99, 255, 0.3);
     color: white;
   }
+}
+
+/* Full-page sections */
+.page-section {
+  min-height: 100vh;
+  width: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Smooth transitions */
+.page-transition {
+  transition: all 0.5s ease-in-out;
 }
 
 @layer components {

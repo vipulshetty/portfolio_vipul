@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useEffect, useRef, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface PageLayoutProps {
   children: React.ReactNode
@@ -12,48 +12,25 @@ const pages = ['/', '/skills', '/projects', '/experience', '/socials']
 
 const pageVariants = {
   initial: (direction: number) => ({
-    opacity: 0,
-    x: direction > 0 ? '5%' : '-5%',
-    scale: 0.98
+    x: direction > 0 ? '100%' : '-100%',
+    opacity: 0
   }),
   animate: {
-    opacity: 1,
     x: 0,
-    scale: 1,
+    opacity: 1,
     transition: {
-      duration: 0.4,
-      ease: [0.22, 1, 0.36, 1]
+      duration: 0.3,
+      ease: 'easeOut'
     }
   },
   exit: (direction: number) => ({
+    x: direction > 0 ? '-100%' : '100%',
     opacity: 0,
-    x: direction > 0 ? '-5%' : '5%',
-    scale: 0.98,
     transition: {
-      duration: 0.4,
-      ease: [0.22, 1, 0.36, 1]
+      duration: 0.3,
+      ease: 'easeIn'
     }
   })
-}
-
-const backgroundVariants = {
-  initial: {
-    opacity: 0
-  },
-  animate: {
-    opacity: 1,
-    transition: {
-      duration: 0.6,
-      ease: [0.22, 1, 0.36, 1]
-    }
-  },
-  exit: {
-    opacity: 0,
-    transition: {
-      duration: 0.6,
-      ease: [0.22, 1, 0.36, 1]
-    }
-  }
 }
 
 export default function PageLayout({ children }: PageLayoutProps) {
@@ -62,208 +39,149 @@ export default function PageLayout({ children }: PageLayoutProps) {
   const currentPageIndex = pages.indexOf(pathname)
   const [direction, setDirection] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [lastWheelTime, setLastWheelTime] = useState(0)
+  const [wheelDirection, setWheelDirection] = useState(0)
+  const wheelCount = useRef(0)
+  const touchStart = useRef(0)
+  const touchEnd = useRef(0)
   const contentRef = useRef<HTMLDivElement>(null)
-  const pageRef = useRef<HTMLDivElement>(null)
-  const wheelTimeout = useRef<NodeJS.Timeout>()
-  const transitionLock = useRef(false)
 
-  const navigateToPage = (newIndex: number, newDirection: number) => {
-    if (transitionLock.current || newIndex < 0 || newIndex >= pages.length) return
-    
-    transitionLock.current = true
+  const isAtBottom = () => {
+    const content = contentRef.current
+    if (!content) return false
+    const threshold = 1 // Tolerance for rounding errors
+    return Math.abs(content.scrollHeight - content.clientHeight - content.scrollTop) <= threshold
+  }
+
+  const isAtTop = () => {
+    const content = contentRef.current
+    if (!content) return false
+    return content.scrollTop <= 0
+  }
+
+  const handleNavigation = (newIndex: number) => {
+    if (isTransitioning || newIndex < 0 || newIndex >= pages.length) return
+    setDirection(newIndex > currentPageIndex ? 1 : -1)
     setIsTransitioning(true)
-    setDirection(newDirection)
-    
     router.push(pages[newIndex])
-    
     setTimeout(() => {
       setIsTransitioning(false)
-      if (pageRef.current) {
-        pageRef.current.scrollTop = 0
-      }
-      setTimeout(() => {
-        transitionLock.current = false
-      }, 100)
-    }, 400)
+      wheelCount.current = 0
+    }, 800)
   }
 
   useEffect(() => {
-    let lastScrollTime = Date.now()
-    let touchStartY = 0
-    let touchEndY = 0
-
     const handleWheel = (e: WheelEvent) => {
-      if (transitionLock.current) return
-      
+      if (isTransitioning) return
+
+      const content = contentRef.current
+      if (!content) return
+
       const now = Date.now()
-      if (now - lastScrollTime < 50) return
-      lastScrollTime = now
+      const timeDiff = now - lastWheelTime
+      const currentDirection = Math.sign(e.deltaY)
 
-      if (!pageRef.current) return
-
-      const delta = e.deltaY
-      const { scrollTop, scrollHeight, clientHeight } = pageRef.current
-      const isScrollable = scrollHeight > clientHeight
-      const isAtPageBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 10
-      const isAtPageTop = scrollTop === 0
-
-      // If the page is scrollable and we're not at the boundaries, let it scroll normally
-      if (isScrollable && !isAtPageBottom && !isAtPageTop) {
+      // Allow normal scrolling if not at edges
+      if (!(isAtTop() && currentDirection < 0) && !(isAtBottom() && currentDirection > 0)) {
         return
       }
 
-      // If we're at the boundaries, prevent default and handle page transition
-      if (Math.abs(delta) > 50) {
-        if (delta > 0 && isAtPageBottom && currentPageIndex < pages.length - 1) {
-          e.preventDefault()
-          navigateToPage(currentPageIndex + 1, 1)
-        } else if (delta < 0 && isAtPageTop && currentPageIndex > 0) {
-          e.preventDefault()
-          navigateToPage(currentPageIndex - 1, -1)
+      e.preventDefault()
+
+      // Reset wheel count if direction changed or too much time passed
+      if (currentDirection !== wheelDirection || timeDiff > 200) {
+        wheelCount.current = 0
+      }
+
+      wheelCount.current += Math.abs(e.deltaY)
+      setWheelDirection(currentDirection)
+      setLastWheelTime(now)
+
+      // Only trigger navigation after accumulated enough wheel events in same direction
+      if (wheelCount.current > 100) {
+        if (currentDirection > 0 && isAtBottom() && currentPageIndex < pages.length - 1) {
+          handleNavigation(currentPageIndex + 1)
+        } else if (currentDirection < 0 && isAtTop() && currentPageIndex > 0) {
+          handleNavigation(currentPageIndex - 1)
         }
+        wheelCount.current = 0
       }
     }
 
     const handleTouchStart = (e: TouchEvent) => {
-      touchStartY = e.touches[0].clientY
+      touchStart.current = e.touches[0].clientY
     }
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (transitionLock.current) return
-      touchEndY = e.touches[0].clientY
-
-      if (!pageRef.current) return
-
-      const { scrollTop, scrollHeight, clientHeight } = pageRef.current
-      const isScrollable = scrollHeight > clientHeight
-      const isAtPageBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 10
-      const isAtPageTop = scrollTop === 0
-
-      // If we're not at boundaries, let it scroll normally
-      if (isScrollable && !isAtPageBottom && !isAtPageTop) {
-        return
-      }
-
-      // Prevent default only at boundaries
-      if (isAtPageBottom || isAtPageTop) {
-        e.preventDefault()
-      }
-    }
-
-    const handleTouchEnd = () => {
-      if (transitionLock.current) return
+      if (isTransitioning) return
       
-      const touchDelta = touchStartY - touchEndY
-      
-      if (!pageRef.current) return
+      const content = contentRef.current
+      if (!content) return
 
-      const { scrollTop, scrollHeight, clientHeight } = pageRef.current
-      const isAtPageBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 10
-      const isAtPageTop = scrollTop === 0
-      
-      if (Math.abs(touchDelta) > 50) {
-        if (touchDelta > 0 && isAtPageBottom && currentPageIndex < pages.length - 1) {
-          navigateToPage(currentPageIndex + 1, 1)
-        } else if (touchDelta < 0 && isAtPageTop && currentPageIndex > 0) {
-          navigateToPage(currentPageIndex - 1, -1)
+      touchEnd.current = e.touches[0].clientY
+      const distance = touchStart.current - touchEnd.current
+      const minSwipeDistance = 50 // minimum distance for swipe
+
+      // Only handle page transitions at content boundaries
+      if (Math.abs(distance) > minSwipeDistance) {
+        if (distance > 0 && isAtBottom() && currentPageIndex < pages.length - 1) {
+          handleNavigation(currentPageIndex + 1)
+        } else if (distance < 0 && isAtTop() && currentPageIndex > 0) {
+          handleNavigation(currentPageIndex - 1)
         }
-      }
-    }
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (transitionLock.current) return
-      
-      if (!pageRef.current) return
-
-      const { scrollTop, scrollHeight, clientHeight } = pageRef.current
-      const isAtPageBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 10
-      const isAtPageTop = scrollTop === 0
-      
-      if (e.key === 'ArrowDown' && isAtPageBottom && currentPageIndex < pages.length - 1) {
-        navigateToPage(currentPageIndex + 1, 1)
-      } else if (e.key === 'ArrowUp' && isAtPageTop && currentPageIndex > 0) {
-        navigateToPage(currentPageIndex - 1, -1)
+        touchStart.current = touchEnd.current
       }
     }
 
     window.addEventListener('wheel', handleWheel, { passive: false })
-    window.addEventListener('touchstart', handleTouchStart, { passive: false })
-    window.addEventListener('touchmove', handleTouchMove, { passive: false })
-    window.addEventListener('touchend', handleTouchEnd)
-    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('touchstart', handleTouchStart, { passive: true })
+    window.addEventListener('touchmove', handleTouchMove, { passive: true })
 
     return () => {
       window.removeEventListener('wheel', handleWheel)
       window.removeEventListener('touchstart', handleTouchStart)
       window.removeEventListener('touchmove', handleTouchMove)
-      window.removeEventListener('touchend', handleTouchEnd)
-      window.removeEventListener('keydown', handleKeyDown)
-      if (wheelTimeout.current) {
-        clearTimeout(wheelTimeout.current)
-      }
     }
-  }, [currentPageIndex])
+  }, [currentPageIndex, isTransitioning, lastWheelTime, wheelDirection])
 
   return (
-    <div className="fixed inset-0 bg-background overflow-hidden">
-      {/* Background Grid with Gradient */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
+    <div className="fixed inset-0 bg-background">
+      <AnimatePresence mode="wait" initial={false} custom={direction}>
         <motion.div
-          key={pathname + '-bg'}
-          variants={backgroundVariants}
+          key={pathname}
+          custom={direction}
+          variants={pageVariants}
           initial="initial"
           animate="animate"
           exit="exit"
-          className="absolute inset-0"
+          className="h-full"
         >
-          <div className="absolute inset-0 grid-background opacity-30" />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent" />
-        </motion.div>
-      </div>
-      
-      {/* Main Content */}
-      <div 
-        ref={contentRef}
-        className="relative z-10 h-full"
-      >
-        <AnimatePresence
-          mode="wait"
-          initial={false}
-          custom={direction}
-        >
-          <motion.div
-            key={pathname}
-            custom={direction}
-            variants={pageVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            className="h-full"
+          <div 
+            ref={contentRef}
+            className="h-full overflow-y-auto overflow-x-hidden"
+            style={{
+              WebkitOverflowScrolling: 'touch'
+            }}
           >
-            <div 
-              ref={pageRef}
-              className="h-full overflow-y-auto overflow-x-hidden scroll-smooth"
-            >
-              {children}
-            </div>
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Navigation Indicators */}
-        <div className="fixed right-8 top-1/2 -translate-y-1/2 flex flex-col gap-3">
-          {pages.map((page, index) => (
-            <button
-              key={page}
-              onClick={() => navigateToPage(index, index > currentPageIndex ? 1 : -1)}
-              className={`w-2 h-2 rounded-full transition-all duration-500 ${
-                index === currentPageIndex 
-                  ? 'bg-primary h-6' 
-                  : 'bg-white/30 hover:bg-white/50'
-              }`}
-              disabled={isTransitioning}
-            />
-          ))}
-        </div>
+            {children}
+          </div>
+        </motion.div>
+      </AnimatePresence>
+      
+      {/* Page Indicators */}
+      <div className="fixed right-8 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-50">
+        {pages.map((page, index) => (
+          <button
+            key={page}
+            onClick={() => handleNavigation(index)}
+            className={`w-2 h-2 rounded-full transition-all duration-500 ${
+              index === currentPageIndex 
+                ? 'bg-primary h-6' 
+                : 'bg-white/30 hover:bg-white/50'
+            }`}
+            disabled={isTransitioning}
+          />
+        ))}
       </div>
     </div>
   )

@@ -51,29 +51,10 @@ export default function ProjectsPage() {
   return (
     <div className="min-h-screen bg-slate-950">
       <div className="relative z-10">
-        <LampDemo>
-          <div className="text-center mb-16">
-            <motion.h1 
-              className="text-4xl md:text-6xl font-bold text-white mb-4"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              My Projects
-            </motion.h1>
-            <motion.p 
-              className="text-gray-400 max-w-2xl mx-auto text-lg"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              Explore my latest work and side projects
-            </motion.p>
-          </div>
-        </LampDemo>
+        <LampDemo />
       </div>
 
-      <div className="relative z-20 container mx-auto px-4 py-16">
+      <div className="relative z-20 container mx-auto px-4 -mt-16">
         {/* Category Filter */}
         <motion.div 
           className="flex justify-center mb-16"
@@ -150,11 +131,6 @@ export default function ProjectsPage() {
                 >
                   {project.title}
                 </motion.h3>
-
-                {/* Project Description */}
-                <p className="text-gray-300 text-lg mb-6 line-clamp-2 group-hover:line-clamp-none transition-all duration-300">
-                  {project.description}
-                </p>
 
                 {/* Highlights */}
                 <div className="mb-8 space-y-3">

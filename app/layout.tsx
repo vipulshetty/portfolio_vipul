@@ -1,10 +1,15 @@
+import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import CustomCursor from '@/components/CustomCursor'
+import Navbar from '@/components/Navbar'
+import PageLayout from '@/components/PageLayout'
 
 const inter = Inter({ subsets: ['latin'] })
 
-
+export const metadata: Metadata = {
+  title: 'Portfolio - Vipul Shetty',
+  description: 'Personal portfolio showcasing my work and experience',
+}
 
 export default function RootLayout({
   children,
@@ -13,9 +18,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-gradient-to-br from-gray-900 to-gray-800 text-white`}>
-        <CustomCursor />
-        {children}
+      <body className={inter.className}>
+        <Navbar />
+        <PageLayout>
+          {children}
+        </PageLayout>
       </body>
     </html>
   )

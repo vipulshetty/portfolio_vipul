@@ -222,51 +222,49 @@ export default function PageLayout({ children }: PageLayoutProps) {
       </div>
       
       {/* Main Content */}
-      <main className="flex-1 w-full min-h-screen relative overflow-y-auto overscroll-none touch-pan-y">
-        <div 
-          ref={contentRef}
-          className="h-full overflow-y-auto -webkit-overflow-scrolling-touch"
+      <div 
+        ref={contentRef}
+        className="relative z-10 h-full"
+      >
+        <AnimatePresence
+          mode="wait"
+          initial={false}
+          custom={direction}
         >
-          <AnimatePresence
-            mode="wait"
-            initial={false}
+          <motion.div
+            key={pathname}
             custom={direction}
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="h-full"
           >
-            <motion.div
-              key={pathname}
-              custom={direction}
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="h-full"
+            <div 
+              ref={pageRef}
+              className="h-full overflow-y-auto overflow-x-hidden scroll-smooth"
             >
-              <div 
-                ref={pageRef}
-                className="h-full overflow-y-auto overflow-x-hidden scroll-smooth"
-              >
-                {children}
-              </div>
-            </motion.div>
-          </AnimatePresence>
+              {children}
+            </div>
+          </motion.div>
+        </AnimatePresence>
 
-          {/* Navigation Indicators */}
-          <div className="fixed right-8 top-1/2 -translate-y-1/2 flex flex-col gap-3">
-            {pages.map((page, index) => (
-              <button
-                key={page}
-                onClick={() => navigateToPage(index, index > currentPageIndex ? 1 : -1)}
-                className={`w-2 h-2 rounded-full transition-all duration-500 ${
-                  index === currentPageIndex 
-                    ? 'bg-primary h-6' 
-                    : 'bg-white/30 hover:bg-white/50'
-                }`}
-                disabled={isTransitioning}
-              />
-            ))}
-          </div>
+        {/* Navigation Indicators */}
+        <div className="fixed right-8 top-1/2 -translate-y-1/2 flex flex-col gap-3">
+          {pages.map((page, index) => (
+            <button
+              key={page}
+              onClick={() => navigateToPage(index, index > currentPageIndex ? 1 : -1)}
+              className={`w-2 h-2 rounded-full transition-all duration-500 ${
+                index === currentPageIndex 
+                  ? 'bg-primary h-6' 
+                  : 'bg-white/30 hover:bg-white/50'
+              }`}
+              disabled={isTransitioning}
+            />
+          ))}
         </div>
-      </main>
+      </div>
     </div>
   )
 }

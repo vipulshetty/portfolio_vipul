@@ -1,18 +1,19 @@
-'use client'
+"use client";
 
-import { useState, useRef, useMemo, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Text, OrbitControls, Stars, Html, Sparkles, Trail, Float, MeshDistortMaterial } from '@react-three/drei'
-import * as THREE from 'three'
-import { FaReact, FaNodeJs, FaPython, FaSass, FaDocker, FaAws } from 'react-icons/fa'
-import { SiNextdotjs, SiRedux, SiExpress, SiMongodb, SiJavascript, SiTypescript, SiFramer, SiCplusplus, SiPostgresql, SiKubernetes, SiApachekafka, SiPrometheus, SiGrafana, SiAzuredevops, SiThreedotjs } from 'react-icons/si'
+import { motion } from 'framer-motion';
+import { SiNextdotjs, SiRedux, SiExpress, SiMongodb, SiJavascript, 
+         SiTypescript, SiFramer, SiCplusplus, SiPostgresql, 
+         SiKubernetes, SiApachekafka, SiPrometheus, SiGrafana } from 'react-icons/si';
+import { FaReact, FaNodeJs, FaPython, FaSass, FaDocker, 
+         FaAws, FaCode, FaMicrosoft } from 'react-icons/fa';
+import { WarpBackground } from '@/components/ui/warp-background';
+import { useState } from 'react';
 
 interface Skill {
-  name: string;
-  icon: React.ElementType;
-  color: string;
-  type: 'dev' | 'devops';
+  name: string
+  icon: any
+  color: string
+  type: 'dev' | 'devops'
 }
 
 const skills: Skill[] = [
@@ -29,307 +30,247 @@ const skills: Skill[] = [
   { name: 'C++', icon: SiCplusplus, color: '#00599C', type: 'dev' },
   { name: 'Sass', icon: FaSass, color: '#CC6699', type: 'dev' },
   { name: 'PostgreSQL', icon: SiPostgresql, color: '#336791', type: 'dev' },
-  { name: 'Three.js', icon: SiThreedotjs, color: '#000000', type: 'dev' },
+  { name: 'Three.js', icon: FaCode, color: '#000000', type: 'dev' },
   { name: 'Docker', icon: FaDocker, color: '#2496ED', type: 'devops' },
   { name: 'Kubernetes', icon: SiKubernetes, color: '#326CE5', type: 'devops' },
   { name: 'Kafka', icon: SiApachekafka, color: '#231F20', type: 'devops' },
   { name: 'Prometheus', icon: SiPrometheus, color: '#E6522C', type: 'devops' },
   { name: 'Grafana', icon: SiGrafana, color: '#F46800', type: 'devops' },
-  { name: 'Azure', icon: SiAzuredevops, color: '#0078D4', type: 'devops' },
+  { name: 'Azure DevOps', icon: FaMicrosoft, color: '#0078D4', type: 'devops' },
   { name: 'AWS', icon: FaAws, color: '#FF9900', type: 'devops' },
 ]
 
-interface SkillNodeProps {
-  skill: Skill;
-  position: [number, number, number];
-  setHovered: (skill: Skill | null) => void;
-  setSelected: (skill: Skill | null) => void;
+const groupedSkills = {
+  dev: skills.filter(skill => skill.type === 'dev'),
+  devops: skills.filter(skill => skill.type === 'devops')
 }
 
-const SkillNode: React.FC<SkillNodeProps> = ({ skill, position, setHovered, setSelected }) => {
-  const mesh = useRef<THREE.Mesh>(null)
-  const { viewport } = useThree()
-
-  useFrame(({ clock }) => {
-    if (mesh.current) {
-      mesh.current.rotation.y = Math.sin(clock.getElapsedTime() * 0.5) * 0.2
-      mesh.current.position.y = Math.sin(clock.getElapsedTime() * 0.5) * 0.1
-    }
-  })
-
-  const texture = useMemo(() => {
-    const canvas = document.createElement('canvas')
-    canvas.width = 128
-    canvas.height = 128
-    const context = canvas.getContext('2d')
-    if (context) {
-      const gradient = context.createRadialGradient(64, 64, 0, 64, 64, 64)
-      gradient.addColorStop(0, skill.color)
-      gradient.addColorStop(1, 'rgba(0,0,0,0)')
-      context.fillStyle = gradient
-      context.fillRect(0, 0, 128, 128)
-    }
-    return new THREE.CanvasTexture(canvas)
-  }, [skill.color])
+export default function SkillsPage() {
+  const [hoveredSkill, setHoveredSkill] = useState<string | null>(null);
 
   return (
-    <Float speed={1.5} rotationIntensity={0.5} floatIntensity={0.5}>
-      <group position={position}>
-        <Trail
-          width={0.2}
-          length={8}
-          color={new THREE.Color(skill.color)}
-          attenuation={(t) => t * t}
-        >
-          <mesh
-            ref={mesh}
-            onPointerOver={() => setHovered(skill)}
-            onPointerOut={() => setHovered(null)}
-            onClick={() => setSelected(skill)}
+    <main className="min-h-screen bg-black/90 relative overflow-hidden">
+      <WarpBackground 
+        className="min-h-screen w-full"
+        perspective={150}
+        beamsPerSide={4}
+        beamSize={4}
+        beamDuration={4}
+        gridColor="rgba(100, 100, 100, 0.3)"
+      >
+        <div className="max-w-7xl mx-auto px-4 py-20 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-16"
           >
-            <sphereGeometry args={[0.5, 32, 32]} />
-            <MeshDistortMaterial
-              color={skill.color}
-              emissive={skill.color}
-              emissiveIntensity={0.5}
-              transparent
-              opacity={0.8}
-              distort={0.3}
-              speed={2}
-              map={texture}
-            />
-            <Html distanceFactor={10}>
-              <div className="w-16 h-16 flex items-center justify-center bg-white bg-opacity-20 rounded-full backdrop-blur-sm">
-                <skill.icon className="text-4xl" style={{ color: skill.color }} />
-              </div>
-            </Html>
-          </mesh>
-        </Trail>
-        <Text
-          position={[0, -0.8, 0]}
-          fontSize={viewport.width * 0.015}
-          color="white"
-          anchorX="center"
-          anchorY="middle"
-        >
-          {skill.name}
-        </Text>
-        <Sparkles count={20} scale={2} size={6} speed={0.4} color={skill.color} />
-      </group>
-    </Float>
-  )
-}
+            <h1 className="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
+              Skills & Expertise
+            </h1>
+            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+              A showcase of my technical journey and proficiency across various technologies
+            </p>
+          </motion.div>
 
-interface SkillConstellationProps {
-  skills: Skill[];
-  setHovered: (skill: Skill | null) => void;
-  setSelected: (skill: Skill | null) => void;
-}
-
-const SkillConstellation: React.FC<SkillConstellationProps> = ({ skills, setHovered, setSelected }) => {
-  const groupRef = useRef<THREE.Group>(null)
-
-  useFrame(({ clock }) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y = Math.sin(clock.getElapsedTime() * 0.1) * 0.1
-    }
-  })
-
-  const skillNodes = useMemo(() => 
-    skills.map((skill, index) => {
-      const theta = (index / skills.length) * Math.PI * 2
-      const radius = 6
-      const x = Math.cos(theta) * radius
-      const z = Math.sin(theta) * radius
-      return (
-        <SkillNode
-          key={skill.name}
-          skill={skill}
-          position={[x, 0, z]}
-          setHovered={setHovered}
-          setSelected={setSelected}
-        />
-      )
-    }),
-    [skills, setHovered, setSelected]
-  )
-
-  return <group ref={groupRef}>{skillNodes}</group>
-}
-
-interface SkillDetailsProps {
-  skill: Skill;
-}
-
-const SkillDetails: React.FC<SkillDetailsProps> = ({ skill }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 50 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -50 }}
-    className="absolute bottom-4 left-4 right-4 bg-gradient-to-r from-purple-900 to-blue-900 p-6 rounded-lg text-white flex items-center justify-between backdrop-blur-md shadow-lg"
-  >
-    <div>
-      <h2 className="text-4xl font-bold mb-2 flex items-center">
-        <skill.icon className="mr-2 text-5xl" style={{ color: skill.color }} /> {skill.name}
-      </h2>
-      <p className="text-xl">
-        {skill.type === 'dev' ? 'Development Skill' : 'DevOps Skill'}
-      </p>
-    </div>
-    <motion.div
-      className="text-9xl"
-      initial={{ rotate: 0 }}
-      animate={{ rotate: 360 }}
-      transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-    >
-      <skill.icon style={{ color: skill.color }} />
-    </motion.div>
-  </motion.div>
-)
-
-const ParticleField: React.FC = () => {
-  const particlesRef = useRef<THREE.Points>(null)
-
-  useFrame(({ clock }) => {
-    if (particlesRef.current) {
-      particlesRef.current.rotation.y += 0.0005
-      particlesRef.current.rotation.x = Math.sin(clock.getElapsedTime() * 0.2) * 0.1
-    }
-  })
-
-  const particleCount = 8000
-  const [positions, colors] = useMemo(() => {
-    const positions = new Float32Array(particleCount * 3)
-    const colors = new Float32Array(particleCount * 3)
-    for (let i = 0; i < particleCount; i++) {
-      const theta = Math.random() * Math.PI * 2
-      const phi = Math.acos(Math.random() * 2 - 1)
-      const radius = Math.random() * 30
-
-      positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta)
-      positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta)
-      positions[i * 3 + 2] = radius * Math.cos(phi)
-
-      const color = new THREE.Color().setHSL(Math.random(), 0.7, 0.5)
-      colors[i * 3] = color.r
-      colors[i * 3 + 1] = color.g
-      colors[i * 3 + 2] = color.b
-    }
-    return [positions, colors]
-  }, [])
-
-  return (
-    <points ref={particlesRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={particleCount}
-          array={positions}
-          itemSize={3}
-        />
-        <bufferAttribute
-          attach="attributes-color"
-          count={particleCount}
-          array={colors}
-          itemSize={3}
-        />
-      </bufferGeometry>
-      <pointsMaterial size={0.05} vertexColors />
-    </points>
-  )
-}
-
-const GlowingRing: React.FC = () => {
-  const ringRef = useRef<THREE.Mesh>(null)
-
-  useFrame(({ clock }) => {
-    if (ringRef.current) {
-      ringRef.current.rotation.z = clock.getElapsedTime() * 0.2
-    }
-  })
-
-  return (
-    <mesh ref={ringRef}>
-      <torusGeometry args={[10, 0.1, 16, 100]} />
-      <meshBasicMaterial color="#4a0e4e" />
-    </mesh>
-  )
-}
-
-export default function Component() {
-  const [hovered, setHovered] = useState<Skill | null>(null)
-  const [selected, setSelected] = useState<Skill | null>(null)
-  const [skillType, setSkillType] = useState<'all' | 'dev' | 'devops'>('all')
-  const [autoRotate, setAutoRotate] = useState(true)
-
-  const filteredSkills = useMemo(() => 
-    skillType === 'all' ? skills : skills.filter(skill => skill.type === skillType),
-    [skillType]
-  )
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setSelected(null)
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
-
-  return (
-    <div className="relative h-screen bg-gradient-to-b from-gray-900 via-blue-900 to-purple-900 overflow-hidden">
-      <Canvas camera={{ position: [0, 0, 12], fov: 70 }}>
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} />
-        <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
-        <ParticleField />
-        <GlowingRing />
-        <SkillConstellation skills={filteredSkills} setHovered={setHovered} setSelected={setSelected} />
-        <OrbitControls enableZoom={false} enablePan={false} autoRotate={autoRotate} autoRotateSpeed={0.5} />
-      </Canvas>
-      <div className="absolute top-4 left-4 right-4 flex justify-between items-center">
-        <h1 className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
-          My Skill Constellation
-        </h1>
-        <div className="space-x-4">
-          {['all', 'dev', 'devops'].map((type) => (
-            <button
-              key={type}
-              className={`px-6 py-3 rounded-full ${
-                skillType === type ? 'bg-gradient-to-r from-purple-500 to-pink-500' : 'bg-gray-700'
-              } text-white transition-all duration-300 hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600 hover:scale-105 transform`}
-              onClick={() => setSkillType(type as 'all' | 'dev' |   'devops')}
+          <div className="space-y-20">
+            {/* Development Skills */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
             >
-              {type === 'all' ? 'All' : type === 'dev' ? 'Development' : 'DevOps'}
-            </button>
-          ))}
-          <button
-            className={`px-6 py-3 rounded-full ${
-              autoRotate ? 'bg-gradient-to-r from-green-500 to-teal-500' : 'bg-gray-700'
-            } text-white transition-all duration-300 hover:bg-gradient-to-r hover:from-green-600 hover:to-teal-600 hover:scale-105 transform`}
-            onClick={() => setAutoRotate(!autoRotate)}
-          >
-            {autoRotate ? 'Auto-rotate On' : 'Auto-rotate Off'}
-          </button>
+              <h2 className="text-3xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400">
+                Development
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                {groupedSkills.dev.map((skill, index) => (
+                  <motion.div
+                    key={skill.name}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{ 
+                      scale: 1.1,
+                      y: -8,
+                    }}
+                    onHoverStart={() => setHoveredSkill(skill.name)}
+                    onHoverEnd={() => setHoveredSkill(null)}
+                    className="group relative flex flex-col items-center gap-3 p-6 rounded-xl backdrop-blur-sm bg-white/5 hover:bg-white/10 transition-all duration-500"
+                  >
+                    {/* Animated Background Glow */}
+                    <div 
+                      className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-500"
+                      style={{
+                        background: `radial-gradient(circle at center, ${skill.color}40 0%, transparent 70%)`,
+                        filter: 'blur(10px)',
+                        transform: 'scale(1.1)'
+                      }}
+                    />
+
+                    {/* Outer Glow Ring */}
+                    <div 
+                      className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-50 transition-all duration-500"
+                      style={{
+                        border: `2px solid ${skill.color}`,
+                        boxShadow: `0 0 20px ${skill.color}, inset 0 0 20px ${skill.color}`,
+                      }}
+                    />
+
+                    {/* Icon Container with Glow */}
+                    <motion.div
+                      style={{ color: skill.color }}
+                      animate={{
+                        scale: hoveredSkill === skill.name ? [1, 1.2, 1] : 1,
+                      }}
+                      transition={{ 
+                        duration: 1.5,
+                        repeat: hoveredSkill === skill.name ? Infinity : 0,
+                        repeatType: "reverse"
+                      }}
+                      className="relative z-10 transform-gpu"
+                    >
+                      {/* Icon Glow Effect */}
+                      <div 
+                        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-500"
+                        style={{
+                          filter: `drop-shadow(0 0 8px ${skill.color}) drop-shadow(0 0 20px ${skill.color})`,
+                        }}
+                      >
+                        <skill.icon className="text-4xl" />
+                      </div>
+                      
+                      {/* Main Icon */}
+                      <skill.icon className="text-4xl relative z-10" />
+                    </motion.div>
+
+                    {/* Skill Name with Glow */}
+                    <span 
+                      className="text-gray-200 font-medium relative z-10 text-center transition-all duration-500 group-hover:text-white"
+                      style={{
+                        textShadow: hoveredSkill === skill.name ? `0 0 10px ${skill.color}` : 'none'
+                      }}
+                    >
+                      {skill.name}
+                    </span>
+
+                    {/* Animated Border */}
+                    <motion.div
+                      className="absolute -bottom-[2px] left-0 right-0 h-1 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500"
+                      style={{
+                        background: `linear-gradient(90deg, transparent 0%, ${skill.color} 50%, transparent 100%)`,
+                        boxShadow: `0 0 10px ${skill.color}`,
+                      }}
+                      initial={{ scaleX: 0 }}
+                      animate={{ 
+                        scaleX: hoveredSkill === skill.name ? 1 : 0
+                      }}
+                      transition={{ duration: 0.5 }}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* DevOps Skills */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <h2 className="text-3xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">
+                DevOps & Cloud
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                {groupedSkills.devops.map((skill, index) => (
+                  <motion.div
+                    key={skill.name}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{ 
+                      scale: 1.1,
+                      y: -8,
+                    }}
+                    onHoverStart={() => setHoveredSkill(skill.name)}
+                    onHoverEnd={() => setHoveredSkill(null)}
+                    className="group relative flex flex-col items-center gap-3 p-6 rounded-xl backdrop-blur-sm bg-white/5 hover:bg-white/10 transition-all duration-500"
+                  >
+                    {/* Animated Background Glow */}
+                    <div 
+                      className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-500"
+                      style={{
+                        background: `radial-gradient(circle at center, ${skill.color}40 0%, transparent 70%)`,
+                        filter: 'blur(10px)',
+                        transform: 'scale(1.1)'
+                      }}
+                    />
+
+                    {/* Outer Glow Ring */}
+                    <div 
+                      className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-50 transition-all duration-500"
+                      style={{
+                        border: `2px solid ${skill.color}`,
+                        boxShadow: `0 0 20px ${skill.color}, inset 0 0 20px ${skill.color}`,
+                      }}
+                    />
+
+                    {/* Icon Container with Glow */}
+                    <motion.div
+                      style={{ color: skill.color }}
+                      animate={{
+                        scale: hoveredSkill === skill.name ? [1, 1.2, 1] : 1,
+                      }}
+                      transition={{ 
+                        duration: 1.5,
+                        repeat: hoveredSkill === skill.name ? Infinity : 0,
+                        repeatType: "reverse"
+                      }}
+                      className="relative z-10 transform-gpu"
+                    >
+                      {/* Icon Glow Effect */}
+                      <div 
+                        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-500"
+                        style={{
+                          filter: `drop-shadow(0 0 8px ${skill.color}) drop-shadow(0 0 20px ${skill.color})`,
+                        }}
+                      >
+                        <skill.icon className="text-4xl" />
+                      </div>
+                      
+                      {/* Main Icon */}
+                      <skill.icon className="text-4xl relative z-10" />
+                    </motion.div>
+
+                    {/* Skill Name with Glow */}
+                    <span 
+                      className="text-gray-200 font-medium relative z-10 text-center transition-all duration-500 group-hover:text-white"
+                      style={{
+                        textShadow: hoveredSkill === skill.name ? `0 0 10px ${skill.color}` : 'none'
+                      }}
+                    >
+                      {skill.name}
+                    </span>
+
+                    {/* Animated Border */}
+                    <motion.div
+                      className="absolute -bottom-[2px] left-0 right-0 h-1 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500"
+                      style={{
+                        background: `linear-gradient(90deg, transparent 0%, ${skill.color} 50%, transparent 100%)`,
+                        boxShadow: `0 0 10px ${skill.color}`,
+                      }}
+                      initial={{ scaleX: 0 }}
+                      animate={{ 
+                        scaleX: hoveredSkill === skill.name ? 1 : 0
+                      }}
+                      transition={{ duration: 0.5 }}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
         </div>
-      </div>
-      <AnimatePresence>
-        {selected && <SkillDetails skill={selected} />}
-      </AnimatePresence>
-      {hovered && !selected && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 20 }}
-          className="absolute bottom-4 left-4 bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-lg text-white backdrop-blur-sm shadow-lg"
-        >
-          <span className="text-2xl font-bold">{hovered.name}</span>
-        </motion.div>
-      )}
-      <div className="absolute bottom-4 right-4 text-white text-lg bg-gray-800 bg-opacity-50 p-2 rounded-lg backdrop-blur-sm">
-        Press ESC to deselect a skill
-      </div>
-    </div>
+      </WarpBackground>
+    </main>
   )
 }

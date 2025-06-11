@@ -1,106 +1,188 @@
 'use client'
 
-import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { useState, useEffect } from 'react'
-import { FaDownload } from 'react-icons/fa'
+import React, { useEffect, useRef, useState } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 
-const navItems = [
-  { name: 'Home', href: '/' },
-  { name: 'Skills', href: '/skills' },
-  { name: 'Projects', href: '/projects' },
-  { name: 'Experience', href: '/experience' },
-  { name: 'Socials', href: '/socials' },
-]
+interface PageLayoutProps {
+  children: React.ReactNode
+}
 
-export default function PageLayout({ children }: { children: React.ReactNode }) {
-  const [activeItem, setActiveItem] = useState('')
-  const [scrollY, setScrollY] = useState(0)
+const pages = ['/', '/skills', '/projects', '/experience', '/socials']
+
+const pageVariants = {
+  initial: (direction: number) => ({
+    x: direction > 0 ? '100%' : '-100%',
+    opacity: 0
+  }),
+  animate: {
+    x: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.3,
+      ease: 'easeOut'
+    }
+  },
+  exit: (direction: number) => ({
+    x: direction > 0 ? '-100%' : '100%',
+    opacity: 0,
+    transition: {
+      duration: 0.3,
+      ease: 'easeIn'
+    }
+  })
+}
+
+export default function PageLayout({ children }: PageLayoutProps) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const currentPageIndex = pages.indexOf(pathname)
+  const [direction, setDirection] = useState(0)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const [lastWheelTime, setLastWheelTime] = useState(0)
+  const [wheelDirection, setWheelDirection] = useState(0)
+  const wheelCount = useRef(0)
+  const touchStart = useRef(0)
+  const touchEnd = useRef(0)
+  const contentRef = useRef<HTMLDivElement>(null)
+
+  const isAtBottom = () => {
+    const content = contentRef.current
+    if (!content) return false
+    const threshold = 1 // Tolerance for rounding errors
+    return Math.abs(content.scrollHeight - content.clientHeight - content.scrollTop) <= threshold
+  }
+
+  const isAtTop = () => {
+    const content = contentRef.current
+    if (!content) return false
+    return content.scrollTop <= 0
+  }
+
+  const handleNavigation = (newIndex: number) => {
+    if (isTransitioning || newIndex < 0 || newIndex >= pages.length) return
+    setDirection(newIndex > currentPageIndex ? 1 : -1)
+    setIsTransitioning(true)
+    router.push(pages[newIndex])
+    setTimeout(() => {
+      setIsTransitioning(false)
+      wheelCount.current = 0
+    }, 800)
+  }
 
   useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY)
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+    const handleWheel = (e: WheelEvent) => {
+      if (isTransitioning) return
+
+      const content = contentRef.current
+      if (!content) return
+
+      const now = Date.now()
+      const timeDiff = now - lastWheelTime
+      const currentDirection = Math.sign(e.deltaY)
+
+      // Allow normal scrolling if not at edges
+      if (!(isAtTop() && currentDirection < 0) && !(isAtBottom() && currentDirection > 0)) {
+        return
+      }
+
+      e.preventDefault()
+
+      // Reset wheel count if direction changed or too much time passed
+      if (currentDirection !== wheelDirection || timeDiff > 200) {
+        wheelCount.current = 0
+      }
+
+      wheelCount.current += Math.abs(e.deltaY)
+      setWheelDirection(currentDirection)
+      setLastWheelTime(now)
+
+      // Only trigger navigation after accumulated enough wheel events in same direction
+      if (wheelCount.current > 100) {
+        if (currentDirection > 0 && isAtBottom() && currentPageIndex < pages.length - 1) {
+          handleNavigation(currentPageIndex + 1)
+        } else if (currentDirection < 0 && isAtTop() && currentPageIndex > 0) {
+          handleNavigation(currentPageIndex - 1)
+        }
+        wheelCount.current = 0
+      }
+    }
+
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStart.current = e.touches[0].clientY
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isTransitioning) return
+      
+      const content = contentRef.current
+      if (!content) return
+
+      touchEnd.current = e.touches[0].clientY
+      const distance = touchStart.current - touchEnd.current
+      const minSwipeDistance = 50 // minimum distance for swipe
+
+      // Only handle page transitions at content boundaries
+      if (Math.abs(distance) > minSwipeDistance) {
+        if (distance > 0 && isAtBottom() && currentPageIndex < pages.length - 1) {
+          handleNavigation(currentPageIndex + 1)
+        } else if (distance < 0 && isAtTop() && currentPageIndex > 0) {
+          handleNavigation(currentPageIndex - 1)
+        }
+        touchStart.current = touchEnd.current
+      }
+    }
+
+    window.addEventListener('wheel', handleWheel, { passive: false })
+    window.addEventListener('touchstart', handleTouchStart, { passive: true })
+    window.addEventListener('touchmove', handleTouchMove, { passive: true })
+
+    return () => {
+      window.removeEventListener('wheel', handleWheel)
+      window.removeEventListener('touchstart', handleTouchStart)
+      window.removeEventListener('touchmove', handleTouchMove)
+    }
+  }, [currentPageIndex, isTransitioning, lastWheelTime, wheelDirection])
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gray-900">
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900" />
+    <div className="fixed inset-0 bg-background">
+      <AnimatePresence mode="wait" initial={false} custom={direction}>
         <motion.div
-          className="absolute inset-0 opacity-30"
-          animate={{
-            backgroundPosition: ['0px 0px', '100px 100px'],
-          }}
-          transition={{
-            repeat: Infinity,
-            repeatType: 'reverse',
-            duration: 20,
-          }}
-          style={{
-            backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%239C92AC" fill-opacity="0.4"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
-          }}
-        />
-      </div>
-      <motion.nav
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ type: 'spring', stiffness: 100 }}
-        className="fixed top-0 left-0 right-0 z-50 bg-opacity-90 bg-gray-900 backdrop-blur-md shadow-lg"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link href="/" className="flex-shrink-0 flex items-center">
-                <motion.span
-                  className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Portfolio
-                </motion.span>
-              </Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              {navItems.map((item) => (
-                <Link key={item.name} href={item.href} className="relative">
-                  <motion.span
-                    className="text-sm font-medium text-gray-300 hover:text-white transition-colors"
-                    onHoverStart={() => setActiveItem(item.name)}
-                    onHoverEnd={() => setActiveItem('')}
-                    whileHover={{ y: -2 }}
-                  >
-                    {item.name}
-                    {activeItem === item.name && (
-                      <motion.div
-                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-500"
-                        layoutId="underline"
-                      />
-                    )}
-                  </motion.span>
-                </Link>
-              ))}
-              <motion.a
-                href="/resume.pdf"
-                download
-                className="bg-purple-600 text-white px-4 py-2 rounded-full font-semibold text-sm hover:bg-purple-700 transition-colors duration-300 shadow-lg flex items-center space-x-2"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <FaDownload />
-                <span>Resume</span>
-              </motion.a>
-            </div>
+          key={pathname}
+          custom={direction}
+          variants={pageVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          className="h-full"
+        >
+          <div 
+            ref={contentRef}
+            className="h-full overflow-y-auto overflow-x-hidden"
+            style={{
+              WebkitOverflowScrolling: 'touch'
+            }}
+          >
+            {children}
           </div>
-        </div>
-      </motion.nav>
-      <main className="pt-16 relative z-10">
-        {children}
-      </main>
-      <motion.div
-        className="fixed bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500"
-        style={{ scaleX: scrollY / (document.documentElement.scrollHeight - window.innerHeight) }}
-      />
+        </motion.div>
+      </AnimatePresence>
+      
+      {/* Page Indicators */}
+      <div className="fixed right-8 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-50">
+        {pages.map((page, index) => (
+          <button
+            key={page}
+            onClick={() => handleNavigation(index)}
+            className={`w-2 h-2 rounded-full transition-all duration-500 ${
+              index === currentPageIndex 
+                ? 'bg-primary h-6' 
+                : 'bg-white/30 hover:bg-white/50'
+            }`}
+            disabled={isTransitioning}
+          />
+        ))}
+      </div>
     </div>
   )
 }

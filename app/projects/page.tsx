@@ -15,12 +15,12 @@ interface Project {
 
 const projects: Project[] = [
   {
-    title: "E-commerce Platform",
-    description: "A full-stack e-commerce solution with real-time inventory management and secure payment processing.",
+    title: "EcoEarn",
+    description: "A sustainable earning platform that rewards users for eco-friendly actions and environmental contributions. Features gamification, carbon footprint tracking, and green rewards system.",
     image: "/placeholder.svg?height=400&width=600",
-    technologies: ["React", "Node.js", "MongoDB", "Stripe"],
-    githubLink: "https://github.com/yourusername/ecommerce-platform",
-    liveLink: "https://ecommerce-platform-demo.com"
+    technologies: ["Next.js", "React", "TypeScript", "Tailwind CSS"],
+    githubLink: "https://github.com/yourusername/ecoearn",
+    liveLink: "https://ecoearn-pi.vercel.app/"
   },
   {
     title: "AI-powered Chatbot",

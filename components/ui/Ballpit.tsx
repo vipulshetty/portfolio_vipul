@@ -806,7 +806,9 @@ function createBallpit(
   };
   return {
     three: threeInstance,
-    spheres: spheres,
+    get spheres() {
+      return spheres;
+    },
     setCount(count: number) {
       initialize({ ...spheres.config, count });
     },

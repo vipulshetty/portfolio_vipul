@@ -16,10 +16,6 @@ const nextConfig = {
   async rewrites() {
     return [];
   },
-  // Enable access from all hosts
-  webSocketServer: {
-    host: '0.0.0.0'
-  }
 }
 
 module.exports = nextConfig

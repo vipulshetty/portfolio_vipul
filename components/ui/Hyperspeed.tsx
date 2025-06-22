@@ -1080,23 +1080,21 @@ class App {
 
   initPasses() {
     this.renderPass = new RenderPass(this.scene, this.camera);
-    this.bloomPass = new EffectPass(
-      this.camera,
-      new BloomEffect({
-        luminanceThreshold: 0.2,
-        luminanceSmoothing: 0,
-        resolutionScale: 1,
-      })
-    );
+    const bloomEffect = new BloomEffect({
+      luminanceThreshold: 0.2,
+      luminanceSmoothing: 0.5,
+      intensity: 1,
+    });
+
+    this.bloomPass = new EffectPass(this.camera, bloomEffect);
 
     const smaaPass = new EffectPass(
       this.camera,
-      new SMAAEffect(
-        this.assets.smaa.search,
-        this.assets.smaa.area,
-        SMAAPreset.MEDIUM
-      )
+      new SMAAEffect({
+        preset: SMAAPreset.MEDIUM,
+      })
     );
+
     this.renderPass.renderToScreen = false;
     this.bloomPass.renderToScreen = false;
     smaaPass.renderToScreen = true;
@@ -1107,30 +1105,7 @@ class App {
   }
 
   loadAssets(): Promise<void> {
-    const assets = this.assets;
-    return new Promise((resolve) => {
-      const manager = new THREE.LoadingManager(resolve as () => void);
-
-      const searchImage = new Image();
-      const areaImage = new Image();
-      assets.smaa = {};
-
-      searchImage.addEventListener("load", function () {
-        assets.smaa.search = this;
-        manager.itemEnd("smaa-search");
-      });
-
-      areaImage.addEventListener("load", function () {
-        assets.smaa.area = this;
-        manager.itemEnd("smaa-area");
-      });
-
-      manager.itemStart("smaa-search");
-      manager.itemStart("smaa-area");
-
-      searchImage.src = SMAAEffect.searchImageDataURL;
-      areaImage.src = SMAAEffect.areaImageDataURL;
-    });
+    return Promise.resolve();
   }
 
   init() {

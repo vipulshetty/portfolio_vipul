@@ -1,302 +1,163 @@
 'use client'
 
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
-import Link from 'next/link'
-import { useRef, useState, useEffect } from 'react'
-import Card from '@/components/Card'
-import { TextGenerateEffect } from '@/components/ui/text-generate-effect'
-import { HyperText } from '@/components/ui/hyper-text'
-
-const roles = ['Full Stack Developer', 'Data Scientist', 'DevOps Engineer']
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.3
-    }
-  }
-}
-
-const textVariants = {
-  hidden: { opacity: 0, y: -20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5
-    }
-  }
-}
-
-const cardVariants = {
-  hidden: (custom: number) => ({
-    opacity: 0,
-    y: 20,
-    transition: {
-      delay: custom * 0.2
-    }
-  }),
-  visible: (custom: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: custom * 0.2,
-      duration: 0.5
-    }
-  }),
-  hover: {
-    scale: 1.02,
-    transition: {
-      duration: 0.2
-    }
-  }
-}
-
-const backgroundVariants = {
-  hidden: { opacity: 0, scale: 0.8 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      duration: 1.5,
-      ease: [0.22, 1, 0.36, 1]
-    }
-  }
-}
+import Aurora from "@/components/ui/Aurora";
+import { portfolioData } from "@/lib/portfolio-data";
+import { motion } from 'framer-motion';
+import { SkillsMarquee } from "@/components/ui/SkillsMarquee";
+import { ProjectCard } from "@/components/ui/ProjectCard";
+import { Timeline } from '@/components/ui/timeline';
+import { FaGithub, FaLinkedin } from 'react-icons/fa';
+import Orb from '@/components/ui/Orb';
+import Hyperspeed, { hyperspeedPresets } from '@/components/ui/Hyperspeed';
+import Ballpit from "@/components/ui/Ballpit";
+import Threads from "@/components/ui/Threads";
+import { ArrowUpRight } from "lucide-react";
+import Image from "next/image";
 
 export default function Home() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end start"]
-  })
-
-  const [currentRole, setCurrentRole] = useState(0)
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentRole((prev) => (prev + 1) % roles.length)
-    }, 3000)
-    return () => clearInterval(interval)
-  }, [])
-
   return (
-    <main className="min-h-screen w-full pt-[80px]">
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        {/* Hero Section */}
-        <section className="min-h-screen w-full flex flex-col justify-center relative overflow-hidden">
-          {/* Background Elements */}
-          <div className="absolute inset-0 z-0">
-            <div className="absolute inset-0 grid-background opacity-30" />
-            <div className="absolute inset-0 bg-gradient-to-br from-[#6C63FF]/5 via-transparent to-transparent" />
-            <div className="absolute top-20 right-20 w-[600px] h-[600px] bg-[#6C63FF] rounded-full blur-[160px] opacity-20" />
-            <div className="absolute -bottom-20 -left-20 w-[800px] h-[800px] bg-[#5C4CE5] rounded-full blur-[180px] opacity-15" />
+    <main className="min-h-screen w-full bg-black text-white">
+      <section id="home" className="relative h-screen w-full flex flex-col items-start justify-center">
+        {/* Background */}
+        <div className="absolute top-0 left-0 w-full h-full">
+           <Aurora
+            colorStops={["#3A29FF", "#FF94B4", "#FF3232"]}
+            blend={0.5}
+            amplitude={1.0}
+            speed={0.5}
+          />
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 container mx-auto px-6">
+          <motion.div 
+            className="max-w-3xl"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+            <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tighter mb-4">
+              Hey! It&apos;s me <span className="text-purple-300">{portfolioData.name.split(' ')[0]}</span>
+            </h1>
+            <p className="text-lg md:text-xl text-gray-300 max-w-2xl">
+              A full-stack developer and DevOps enthusiast, building and deploying seamless cloud experiences.
+            </p>
+          </motion.div>
+        </div>
+        <div className="absolute bottom-12 left-0 right-0 z-20">
+          <div className="container mx-auto px-6 flex items-center justify-center gap-8">
+              {portfolioData.socials.map((social) => (
+                <a 
+                  key={social.name}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group"
+                >
+                  <span className="text-sm font-medium tracking-wider uppercase">{social.name}</span>
+                  <ArrowUpRight size={16} className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"/>
+                </a>
+              ))}
           </div>
+        </div>
+      </section>
 
-          {/* Main Content */}
-          <div className="relative z-10 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="w-full">
-              {/* Hero Content */}
-              <div className="mb-8 mt-6">
-                <h1 className="text-6xl md:text-7xl font-bold mb-4 text-left tracking-tight">
-                  Hey, I'm{' '}
-                  <HyperText 
-                    className="text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#6C63FF] via-[#5C4CE5] to-[#6C63FF] bg-[length:200%_auto] animate-gradient"
-                    duration={2000}
-                    delay={300}
-                    animateOnHover={true}
-                    startOnView={true}
-                  >
-                    VIPUL SHETTY
-                  </HyperText>
-                </h1>
-              </div>
+      <section id="about" className="relative py-20 px-4 h-96">
+        <div className="absolute inset-0 w-full h-full">
+           <Hyperspeed effectOptions={hyperspeedPresets.three} />
+        </div>
+        <div className="relative z-10 flex flex-col items-center justify-center h-full text-center">
+            <h2 className="text-4xl md:text-5xl font-bold text-white">About Me</h2>
+            <p className="text-lg text-gray-300 mt-4 max-w-3xl">
+              Experienced Full Stack Developer specializing in AI-driven applications and scalable cloud solutions. 
+              Proficient in React.js, Next.js, and AWS, with a strong command of DevOps practices to optimize performance, 
+              slash costs, and build efficient data workflows from the ground up.
+            </p>
+        </div>
+      </section>
 
-              <TextGenerateEffect
-                words="Crafting scalable applications with modern technologies. Transforming data into insights. Building robust cloud infrastructure."
-                className="text-sm text-white/70 max-w-2xl text-left leading-relaxed mb-6"
-              />
+      <section id="skills" className="py-20">
+        <SkillsMarquee />
+      </section>
+      
+      <section id="projects" className="py-20 px-4 relative">
+        <div className="absolute inset-0 w-full h-full opacity-20">
+          <Threads
+            color={[0.3, 0.3, 0.3]}
+            amplitude={0.2}
+            distance={0.2}
+            enableMouseInteraction={false}
+          />
+        </div>
+        <div className="relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-white">My Projects</h2>
+            <p className="text-lg text-gray-400 mt-2">A selection of my work, from web apps to open-source.</p>
+          </div>
+          <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
+            {portfolioData.projects.map((project) => (
+              <ProjectCard key={project.title} project={project} />
+            ))}
+          </div>
+        </div>
+      </section>
 
-              <div className="h-[40px] overflow-hidden text-left mb-4">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={roles[currentRole]}
-                    initial={{ y: 40, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: -40, opacity: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="text-2xl font-medium bg-gradient-to-r from-white/90 to-white/60 bg-clip-text text-transparent"
-                  >
-                    {roles[currentRole]}
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-
-              <motion.p 
-                variants={textVariants}
-                className="text-xl text-white/70 max-w-2xl text-left leading-relaxed mb-16"
-              >
-              </motion.p>
-
-              <motion.div 
-                variants={textVariants}
-                className="flex items-center gap-4 mb-16"
-              >
-                <Link 
-                  href="/projects"
-                  className="group relative px-6 py-3 rounded-lg overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#6C63FF] to-[#4c45cc] transition-transform duration-300 group-hover:scale-[1.05]" />
-                  <span className="relative z-10 text-white font-medium flex items-center gap-2">
-                    View Projects
-                    <motion.svg 
-                      className="w-4 h-4"
-                      initial={{ x: 0 }}
-                      animate={{ x: [0, 5, 0] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </motion.svg>
-                  </span>
-                </Link>
-                <Link 
-                  href="/contact"
-                  className="group relative px-6 py-3 rounded-lg overflow-hidden"
-                >
-                  <div className="absolute inset-0 border border-white/10 rounded-lg transition-colors duration-300 group-hover:border-white/20" />
-                  <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <span className="relative z-10 text-white font-medium flex items-center gap-2">
-                    Contact Me
-                    <motion.svg 
-                      className="w-4 h-4"
-                      initial={{ x: 0 }}
-                      animate={{ x: [0, 5, 0] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </motion.svg>
-                  </span>
-                </Link>
-              </motion.div>
-
-              {/* Proficiency Areas */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
-                {[
-                  {
-                    title: 'Full Stack',
-                    description: 'Building scalable web applications with modern technologies.',
-                    gradient: 'from-[#FF6B6B] to-[#FF8E8E]',
-                    color: '#FF6B6B',
-                    command: 'next create-app@latest',
-                  },
-                  {
-                    title: 'Data Science',
-                    description: 'Transforming data into actionable insights.',
-                    gradient: 'from-[#4ECDC4] to-[#6EE7E7]',
-                    color: '#4ECDC4',
-                    command: 'pip install tensorflow',
-                  },
-                  {
-                    title: 'DevOps',
-                    description: 'Automating and optimizing development workflows.',
-                    gradient: 'from-[#FFD93D] to-[#FFE869]',
-                    color: '#FFD93D',
-                    command: 'docker-compose up -d',
-                  }
-                ].map((area, index) => (
-                  <motion.div
-                    key={area.title}
-                    variants={cardVariants}
-                    custom={index}
-                    className="relative group"
-                  >
-                    <div
-                      className="absolute inset-0 rounded-2xl transition-all duration-300 group-hover:blur-sm"
-                      style={{
-                        background: `linear-gradient(45deg, ${area.color}10, transparent)`,
-                        border: `1px solid ${area.color}20`,
-                        boxShadow: `0 0 30px ${area.color}20`
-                      }}
-                    />
-                    <div className="relative h-full rounded-2xl border border-white/5 bg-black/20 backdrop-blur-sm p-6 overflow-hidden">
-                      <div className="relative z-10 space-y-5">
-                        <div className="flex flex-col space-y-2.5">
-                          <h3 className={`text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${area.gradient}`}>
-                            {area.title}
-                          </h3>
-                          <p className="text-sm text-white/60 leading-relaxed">
-                            {area.description}
-                          </p>
-                        </div>
-                        <Card command={area.command} />
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* Scroll Indicator */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.5, duration: 0.8 }}
-                className="absolute bottom-8 left-8 flex flex-col items-start"
-              >
-                <motion.span 
-                  className="text-sm text-white/50 mb-2"
-                  animate={{
-                    opacity: [0.5, 1, 0.5],
-                    y: [0, -5, 0]
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                >
-                  Scroll to explore
-                </motion.span>
-                <motion.div
-                  className="w-5 h-8 border-2 border-white/20 rounded-full relative"
-                  animate={{
-                    boxShadow: [
-                      "0 0 0px rgba(255,255,255,0.2)",
-                      "0 0 20px rgba(255,255,255,0.2)",
-                      "0 0 0px rgba(255,255,255,0.2)"
-                    ]
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                >
-                  <motion.div
-                    className="absolute top-1 left-1/2 w-1 h-1 bg-white/50 rounded-full -translate-x-1/2"
-                    animate={{
-                      y: [0, 20, 0],
-                      opacity: [1, 0.5, 1]
-                    }}
-                    transition={{
-                      duration: 1.5,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                  />
-                </motion.div>
-              </motion.div>
+      <section id="experience" className="py-20 px-4 relative overflow-hidden">
+         <div className="absolute inset-0 w-full h-full opacity-40">
+           <Orb rotateOnHover={true} hoverIntensity={0.4} />
+         </div>
+         <div className="relative z-10">
+            <div className="text-center mb-16">
+                <h2 className="text-4xl md:text-5xl font-bold text-white">My Experience</h2>
+                <p className="text-lg text-gray-400 mt-2">A timeline of my professional journey.</p>
             </div>
+            <div className="max-w-4xl mx-auto">
+                <Timeline data={portfolioData.experience} />
+            </div>
+         </div>
+      </section>
+
+      <section id="contact" className="relative py-20 px-4 overflow-hidden">
+        <div className="absolute inset-0 w-full h-full">
+           <Ballpit
+            colors={[0x8A2BE2, 0x4B0082, 0x9400D3]}
+            gravity={0.1}
+            minSize={0.8}
+            maxSize={1.2}
+           />
+        </div>
+        <div className="relative z-10 text-center max-w-2xl mx-auto flex flex-col items-center">
+          <h2 className="text-4xl md:text-5xl font-bold text-white">Get In Touch</h2>
+          <p className="text-lg text-gray-300 mt-4 mb-8">
+            I&apos;m always open to discussing new projects, creative ideas, or opportunities to be part of an amazing team.
+          </p>
+          <motion.a
+            href={`mailto:${portfolioData.contact.email}`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="inline-block bg-purple-600 text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:bg-purple-700 transition-colors"
+          >
+            Say Hello
+          </motion.a>
+          <div className="mt-16 flex justify-center gap-8">
+            {portfolioData.socials.filter(s => s.name !== 'Email').map(social => (
+              <motion.a
+                key={social.name}
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ y: -4 }}
+                className="text-gray-400 hover:text-white"
+                title={social.name}
+              >
+                {social.name === 'GitHub' && <FaGithub size={28} />}
+                {social.name === 'LinkedIn' && <FaLinkedin size={28} />}
+              </motion.a>
+            ))}
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
+
     </main>
-  )
+  );
 }
